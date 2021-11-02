@@ -20,6 +20,8 @@ target/
 .Redit*
 .redit*
 
+sample-HDFS
+
 docs/_build
 
 dependency-reduced-pom.xml

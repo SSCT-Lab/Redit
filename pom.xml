@@ -31,6 +31,8 @@
         <module>reditrt</module>
         <module>redit</module>
         <module>sample-multithread</module>
+        <module>sample-scala</module>
+        <module>sample-HDFS</module>
     </modules>
 
 </project>

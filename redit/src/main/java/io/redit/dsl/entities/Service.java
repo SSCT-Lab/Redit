@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2019 Armin Balalaie
+ * Copyright (c) 2021 SATE-Lab
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
+
  */
 
 package io.redit.dsl.entities;
@@ -204,6 +204,26 @@ public class Service extends DeploymentEntity {
          */
         public Builder(Deployment.Builder parentBuilder, Service instance) {
             super(parentBuilder, instance);
+            dockerImageName = new String(instance.dockerImageName);
+            dockerFileAddress = new String(instance.dockerFileAddress);
+            dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);
+            instrumentablePaths = new HashSet<>(instance.instrumentablePaths);
+            initCommand = new String(instance.initCommand);
+            startCommand = new String(instance.startCommand);
+            stopCommand = new String(instance.stopCommand);
+            serviceType = instance.serviceType;
+            applicationPaths = new HashMap<>(instance.applicationPaths);
+            libraryPaths = new HashSet<>(instance.libraryPaths);
+            logFiles = new HashSet<>(instance.logFiles);
+            logDirectories = new HashSet<>(instance.logDirectories);
+            exposedPorts = new HashSet<>(instance.exposedPorts);
+            environmentVariables = new HashMap<>(instance.environmentVariables);
+            pathOrderCounter = new Integer(instance.pathOrderCounter);
+            disableClockDrift = new Boolean(instance.disableClockDrift);
+        }
+
+        public Builder(Deployment.Builder parentBuilder, String newName, Service instance) {
+            super(parentBuilder, newName);
             dockerImageName = new String(instance.dockerImageName);
             dockerFileAddress = new String(instance.dockerFileAddress);
             dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);

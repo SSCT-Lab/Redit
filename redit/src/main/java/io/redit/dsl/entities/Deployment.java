@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2019 Armin Balalaie
+ * Copyright (c) 2021 SATE-Lab
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
+
  */
 
 package io.redit.dsl.entities;
@@ -343,6 +343,19 @@ public class Deployment extends DeploymentEntity {
             return new Node.Builder(this, name, serviceName);
         }
 
+        public  Builder nodeInstances(int numOfNodes, String nodeNamePrefix, String serviceName, boolean offOnStartup) {
+            for(int i = 1; i <= numOfNodes; ++i) {
+                Node.Builder builder = this.withNode(nodeNamePrefix + i, serviceName);
+                if (offOnStartup) {
+                    builder.offOnStartup();
+                }
+
+                builder.and();
+            }
+
+            return this;
+        }
+
         /**
          * Adds a service or changes an existing definition of a service with the same name in the deployment definition
          * @param service definition to be added to the deployment
@@ -379,6 +392,13 @@ public class Deployment extends DeploymentEntity {
             return new Service.Builder(this, name);
         }
 
+        public Service.Builder withService(String name, String baseService) {
+            if (!this.services.containsKey(baseService)) {
+                throw new DeploymentEntityNotFound(baseService, "Service");
+            } else {
+                return new Service.Builder(this, name, (Service)this.services.get(baseService));
+            }
+        }
         /**
          * Returns a service builder initialized with the given name, application library paths from the current Java
          * class path and instrumentable paths based on the given instrumentable path patterns.
