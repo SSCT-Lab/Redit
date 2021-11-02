@@ -1,0 +1,25 @@
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
+
+.Redit*
+.redit*
+
+docs/_build
+
+dependency-reduced-pom.xml
