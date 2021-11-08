@@ -6,13 +6,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-public class TarGzDepressTest {
+public class TarGzDecompressTest {
     public static void main(String[] args) {
         try{
             ZipUtil.unTarGzip("redit/src/test/resource/hellotargz.tar.gz","redit/src/test/resource");
             File f= new File("redit/src/test/resource/targz/hellotargz");
             if(!f.exists()){
-                System.out.println("Depression failed! ");
+                System.out.println("Decompress failed! ");
             }
             else{
                 BufferedReader in = new BufferedReader(new FileReader("redit/src/test/resource/targz/hellotargz"));
@@ -21,7 +21,7 @@ public class TarGzDepressTest {
                     System.out.println("Data error!");
                 }
                 else{
-                    System.out.println("Successfully depress tar.gz file!");
+                    System.out.println("Successfully decompress tar.gz file!");
                 }
             }
         }
@@ -30,7 +30,7 @@ public class TarGzDepressTest {
         }
         finally {
             File f= new File("redit/src/test/resource/targz/");
-            TarGzDepressTest.deleteDir(f);
+            TarGzDecompressTest.deleteDir(f);
         }
     }
     private static boolean deleteDir(File dir) {

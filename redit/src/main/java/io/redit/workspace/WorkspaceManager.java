@@ -150,10 +150,24 @@ public class WorkspaceManager {
                             throw new WorkspaceException("Error while unzipping " + pathEntry.getPath(), e);
                         }
                         retMap.get(service.getName()).put(pathEntry.getPath(), targetDir.toString());
-                    } else {
-                        //TODO DEPRESS for tar.gz file
-                        throw new WorkspaceException("Decompression is only supported for zip files!"
-                                + pathEntry.getPath() + " is not a zip file.");
+
+                    }else{
+
+                        if (!pathEntry.getPath().endsWith(".tar.gz")) {
+                            throw new WorkspaceException("Decompression is only supported for zip, tar.gz files!"
+                                + pathEntry.getPath() + " is not a  file.");
+                        }
+
+                        File targetDir = decompressedDirectory.resolve(service.getName())
+                                .resolve(pathToStringWithoutSlashes(pathEntry.getPath())).toFile();
+
+                        try {
+                            ZipUtil.unTarGzip(pathEntry.getPath(), targetDir.toString());
+                        } catch (InterruptedException | IOException  e) {
+                            throw new WorkspaceException("Error while unzipping " + pathEntry.getPath(), e);
+                        }
+                        retMap.get(service.getName()).put(pathEntry.getPath(), targetDir.toString());
+
                     }
                 }
             }

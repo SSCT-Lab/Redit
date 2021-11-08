@@ -44,7 +44,7 @@ import java.util.zip.GZIPInputStream;
 
 
 public class ZipUtil {
-    public static void unTarGzip(String inputFile, String outputDir) throws IOException {
+    public static void unTarGzip(String inputFile, String outputDir) throws IOException, InterruptedException{
         File unGzippedFile = unGzip(inputFile, outputDir);
         InputStream is = new FileInputStream(unGzippedFile);
         TarArchiveInputStream tarInputStream = null;
