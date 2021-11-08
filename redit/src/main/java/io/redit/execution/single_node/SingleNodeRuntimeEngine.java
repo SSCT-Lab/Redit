@@ -371,6 +371,7 @@ public class SingleNodeRuntimeEngine extends RuntimeEngine {
         } catch (IOException e) {
             throw new RuntimeEngineException("Error while creating initial console log file for node " + node.getName() + "!", e);
         }
+        // TODO following code should delete for security. But no example invoke this code, is there any problem in expose the ports?
         hostConfigBuilder.appendBinds(HostConfig.Bind.from(DockerUtil.mapDockerPathToHostPath(dockerClient,
                 clientContainerId, localConsoleFile)).to("/" + Constants.CONSOLE_OUTERR_FILE_NAME).build());
         // Adds bind mounts for shared directories
