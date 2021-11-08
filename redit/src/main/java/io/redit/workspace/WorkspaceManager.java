@@ -155,7 +155,7 @@ public class WorkspaceManager {
 
                         if (!pathEntry.getPath().endsWith(".tar.gz")) {
                             throw new WorkspaceException("Decompression is only supported for zip, tar.gz files!"
-                                + pathEntry.getPath() + " is not a  file.");
+                                + pathEntry.getPath() + " is not a supported file.");
                         }
 
                         File targetDir = decompressedDirectory.resolve(service.getName())
