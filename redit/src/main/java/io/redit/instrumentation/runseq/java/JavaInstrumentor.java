@@ -87,7 +87,7 @@ public class JavaInstrumentor implements Instrumentor {
         if (!classPathString.isEmpty()) {
             classPathString = "\"" + classPathString + "\"";
         }
-
+//TODO ASPECTJ_HOME is hard to set
         String aspectJHome = System.getenv("ASPECTJ_HOME");
 
         if (aspectJHome == null) {

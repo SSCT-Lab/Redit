@@ -65,7 +65,7 @@ object Main {
         e.printStackTrace()
     }
     try
-      Files.write(Paths.get("/failify/shared"), "I am the best shared file ever!".getBytes)
+      Files.write(Paths.get("/redit/shared"), "I am the best shared file ever!".getBytes)
     catch {
       case e: IOException =>
         e.printStackTrace()

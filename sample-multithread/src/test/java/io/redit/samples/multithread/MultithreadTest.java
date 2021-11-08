@@ -45,7 +45,7 @@ public class MultithreadTest {
 
     @Test
     public void simpleDefinition() throws DeploymentVerificationException, RuntimeEngineException, TimeoutException, WorkspaceException {
-//TODO: forcebuild should be true when running for first time or changing the docker setting, so annoying.
+        //TODO: forcebuild should be true when running for first time or changing the docker setting, so annoying.
         Deployment deployment = Deployment.builder("sample-multithread")
                 // Service Definitions
                 .withServiceFromJvmClasspath("s1", "target/classes", "**commons-io*.jar")

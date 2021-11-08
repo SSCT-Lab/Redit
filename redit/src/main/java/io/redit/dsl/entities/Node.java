@@ -323,10 +323,6 @@ public class Node extends ReferableDeploymentEntity {
          * @return the current builder instance
          */
         public LimitedBuilder tcpPort(Integer... portNumber) {
-//            ArrayList<Integer> tcpPorts=new ArrayList<>();
-//            for(int i=30000;i<=45999;i++){
-//                tcpPorts.add(new Integer(i));
-//            }
             for (Integer port: portNumber) {
                 exposedPorts.add(new ExposedPortDefinition(port, PortType.TCP));
             }
