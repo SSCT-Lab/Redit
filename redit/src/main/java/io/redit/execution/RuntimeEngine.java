@@ -156,17 +156,27 @@ public abstract class RuntimeEngine implements LimitedRuntimeEngine {
 
     protected Map<String, String> improveEnvironmentVariablesMap(String nodeName, Map<String, String> environment)
             throws RuntimeEngineException {
-        //TODO: better to move the address achieving process to method getEventServerIpAddress
-        //Use class NetworkInterface to get the docker0 address
+        // TODO: better to move the address achieving process to method getEventServerIpAddress
+        // Use ipv4 checker to find if the address is ipv4
+        // Use class NetworkInterface to get the docker0 address
         String ipAddress = "";
+        String pattern =
+                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+
         try {
             Enumeration<InetAddress> InetAddressList= NetworkInterface.getByName("docker0").getInetAddresses();
-            InetAddressList.nextElement();
-            if (InetAddressList.hasMoreElements()) {
+            while(InetAddressList.hasMoreElements()) {
                 ipAddress = InetAddressList.nextElement().getHostAddress();
+                if(!ipAddress.matches(pattern)){
+                    ipAddress = "";
+                }
             }
-            else{
+            if(ipAddress.equals("")){
                 ipAddress = getEventServerIpAddress();
+                logger.warn("docker0 address may fail, perhaps causing connection refused.");
             }
         }
         catch (Exception ex){

@@ -151,6 +151,7 @@ public class WorkspaceManager {
                         }
                         retMap.get(service.getName()).put(pathEntry.getPath(), targetDir.toString());
                     } else {
+                        //TODO DEPRESS for tar.gz file
                         throw new WorkspaceException("Decompression is only supported for zip files!"
                                 + pathEntry.getPath() + " is not a zip file.");
                     }
