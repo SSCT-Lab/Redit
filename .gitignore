@@ -16,7 +16,8 @@ out/
 # Maven
 log/
 target/
-!hadoop-3.1.2-build
+
+!hadoop-3.1.2-build/hadoop-dist/target/
 
 .Redit*
 .redit*
