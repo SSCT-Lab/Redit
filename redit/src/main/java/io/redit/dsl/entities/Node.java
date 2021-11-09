@@ -217,11 +217,12 @@ public class Node extends ReferableDeploymentEntity {
          * @param instance a node object instance to be changed
          */
         protected LimitedBuilder(Deployment.Builder parentBuilder, Node instance) {
+            //todo should initcommand be forced to be string?
             super(parentBuilder, instance);
             serviceName = new String(instance.serviceName);
-            initCommand = new String(instance.initCommand);
-            startCommand = new String(instance.startCommand);
-            stopCommand = new String(instance.stopCommand);
+            this.initCommand = instance.initCommand == null ? null : new String(instance.initCommand);
+            this.startCommand = instance.startCommand == null ? null : new String(instance.startCommand);
+            this.stopCommand = instance.stopCommand == null ? null : new String(instance.stopCommand);
             applicationPaths = new HashMap<>(instance.applicationPaths);
             exposedPorts = new HashSet<>(instance.exposedPorts);
             environmentVariables = new HashMap<>(instance.environmentVariables);

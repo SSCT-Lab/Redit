@@ -49,6 +49,7 @@ public class Service extends DeploymentEntity {
     private final Set<String> logDirectories; // set of target log directories to be collected
     private final Set<ExposedPortDefinition> exposedPorts; // set of exposed TCP or UDP ports for the node
     private final Map<String, String> environmentVariables; // map of env vars name to value
+    private final String dockerImage;
     private final String dockerImageName; // the docker image name and tag to be used for this service
     private final String dockerFileAddress; // the dockerfile address to be used to create the docker image for this service
     private final Boolean dockerImageForceBuild; // the flag to force the build of the dockerfile
@@ -66,6 +67,7 @@ public class Service extends DeploymentEntity {
      */
     private Service(Builder builder) {
         super(builder.getName());
+        dockerImage = builder.dockerImage;
         dockerImageName = builder.dockerImageName;
         dockerFileAddress = builder.dockerFileAddress;
         dockerImageForceBuild = builder.dockerImageForceBuild;
@@ -84,6 +86,9 @@ public class Service extends DeploymentEntity {
         disableClockDrift = builder.disableClockDrift;
     }
 
+    public String getDockerImage() {
+        return this.dockerImage;
+    }
     public String getDockerImageName() {
         return dockerImageName;
     }
@@ -148,6 +153,7 @@ public class Service extends DeploymentEntity {
      * The builder class to build a service object
      */
     public static class Builder extends BuilderBase<Service, Deployment.Builder> {
+        //TODO docker img name and docker img is mixed
         private static Logger logger = LoggerFactory.getLogger(Builder.class);
 
         private Map<String, PathEntry> applicationPaths;
@@ -156,6 +162,7 @@ public class Service extends DeploymentEntity {
         private Set<String> logDirectories;
         private Set<ExposedPortDefinition> exposedPorts;
         private Map<String, String> environmentVariables;
+        private String dockerImage;
         private String dockerImageName;
         private String dockerFileAddress;
         private Boolean dockerImageForceBuild;
@@ -181,6 +188,7 @@ public class Service extends DeploymentEntity {
             logDirectories = new HashSet<>();
             exposedPorts = new HashSet<>();
             environmentVariables = new HashMap<>();
+            dockerImage = "ubuntu";
             dockerImageName = Constants.DEFAULT_BASE_DOCKER_IMAGE_NAME;
             dockerImageForceBuild = false;
             dockerFileAddress = null;
@@ -223,14 +231,16 @@ public class Service extends DeploymentEntity {
         }
 
         public Builder(Deployment.Builder parentBuilder, String newName, Service instance) {
+            //fixme initCommand should be forced to be String?
+
             super(parentBuilder, newName);
             dockerImageName = new String(instance.dockerImageName);
             dockerFileAddress = new String(instance.dockerFileAddress);
             dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);
             instrumentablePaths = new HashSet<>(instance.instrumentablePaths);
-            initCommand = new String(instance.initCommand);
-            startCommand = new String(instance.startCommand);
-            stopCommand = new String(instance.stopCommand);
+            this.initCommand = instance.initCommand == null ? null : new String(instance.initCommand);
+            this.startCommand = instance.startCommand == null ? null : new String(instance.startCommand);
+            this.stopCommand = instance.stopCommand == null ? null : new String(instance.stopCommand);
             serviceType = instance.serviceType;
             applicationPaths = new HashMap<>(instance.applicationPaths);
             libraryPaths = new HashSet<>(instance.libraryPaths);

@@ -424,6 +424,14 @@ public class SingleNodeRuntimeEngine extends RuntimeEngine {
                 .toAbsolutePath().toString();
     }
 
+    private String getDockerImageCmd(String dockerImageName) throws RuntimeEngineException {
+        try {
+            return String.join(" ", this.dockerClient.inspectImage(dockerImageName).config().cmd());
+        } catch (InterruptedException | DockerException var3) {
+            throw new RuntimeEngineException("Error while inspecting docker image " + dockerImageName + " to get its cmd string", var3);
+        }
+    }
+
     /**
      * This method creates a customized wrapper script for the node in its root directory
      * @return the address of wrapper script
@@ -442,6 +450,14 @@ public class SingleNodeRuntimeEngine extends RuntimeEngine {
                 wrapperScriptString = wrapperScriptString.replace("{{INIT_COMMAND}}", initCommand);
             } else {
                 wrapperScriptString = wrapperScriptString.replace("{{INIT_COMMAND}}", ":");
+            }
+
+            if (startCommand == null) {
+                startCommand = this.getDockerImageCmd(this.deployment.getService(node.getServiceName()).getDockerImageName());
+            }
+
+            if (startCommand == null) {
+                throw new RuntimeEngineException("Start command for node " + node.getName() + " is null and its docker image doesnt have a default cmd");
             }
             wrapperScriptString = wrapperScriptString.replace("{{START_COMMAND}}", startCommand);
 
