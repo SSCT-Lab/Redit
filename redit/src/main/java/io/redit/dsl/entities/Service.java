@@ -232,16 +232,16 @@ public class Service extends DeploymentEntity {
         }
 
         public Builder(Deployment.Builder parentBuilder, String newName, Service instance) {
-            //fixme initCommand should be forced to be String?
+
 
             super(parentBuilder, newName);
             dockerImageName = new String(instance.dockerImageName);
             dockerFileAddress = new String(instance.dockerFileAddress);
             dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);
             instrumentablePaths = new HashSet<>(instance.instrumentablePaths);
-            this.initCommand = instance.initCommand == null ? null : new String(instance.initCommand);
-            this.startCommand = instance.startCommand == null ? null : new String(instance.startCommand);
-            this.stopCommand = instance.stopCommand == null ? null : new String(instance.stopCommand);
+            initCommand = instance.initCommand;
+            startCommand = instance.startCommand;
+            stopCommand = instance.stopCommand;
             serviceType = instance.serviceType;
             applicationPaths = new HashMap<>(instance.applicationPaths);
             libraryPaths = new HashSet<>(instance.libraryPaths);
