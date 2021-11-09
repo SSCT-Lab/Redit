@@ -1,5 +1,6 @@
 out/
 
+
 # Eclipse
 .classpath
 .project
@@ -16,8 +17,7 @@ out/
 # Maven
 log/
 target/
-
-!hadoop-3.1.2-build/hadoop-dist/target/
+!/sample-HDFS/hadoop-3.1.2-build/hadoop-dist/target
 
 .Redit*
 .redit*
