@@ -58,6 +58,7 @@ public class Node extends ReferableDeploymentEntity {
     private final Boolean offOnStartup; // the flag to start the node on start up or not
     private final Boolean disableClockDrift; // the flag to disable clock drift capability
     private final Integer pathOrderCounter; // the counter to use for applying order to application paths
+    private final String workDir;
 
     public static Node.LimitedBuilder limitedBuilder(String nodeName, String serviceName) {
         return new Node.LimitedBuilder(nodeName, serviceName);
@@ -82,6 +83,7 @@ public class Node extends ReferableDeploymentEntity {
         logDirectories = builder.logDirectories;
         disableClockDrift = builder.disableClockDrift;
         pathOrderCounter = builder.pathOrderCounter;
+        workDir = builder.workDir;
     }
 
     /**
@@ -103,6 +105,7 @@ public class Node extends ReferableDeploymentEntity {
         logDirectories = builder.logDirectories;
         disableClockDrift = builder.disableClockDrift;
         pathOrderCounter = builder.pathOrderCounter;
+        workDir = builder.workDir;
     }
 
     public String getServiceName() {
@@ -161,6 +164,10 @@ public class Node extends ReferableDeploymentEntity {
         return !disableClockDrift;
     }
 
+    public String getWorkDir() {
+        return this.workDir;
+    }
+
     /**
      * The builder class to build a node object
      */
@@ -178,7 +185,7 @@ public class Node extends ReferableDeploymentEntity {
         protected String stopCommand;
         protected Boolean disableClockDrift; // the flag to disable clock drift capability
         protected Integer pathOrderCounter;
-
+        protected String workDir;
         /**
          * Constructor
          * @param parentBuilder the parent builder object for this builder
@@ -200,6 +207,7 @@ public class Node extends ReferableDeploymentEntity {
             logDirectories = new HashSet<>();
             disableClockDrift = false;
             pathOrderCounter = 0;
+            workDir = null;
         }
 
         /**
@@ -231,6 +239,7 @@ public class Node extends ReferableDeploymentEntity {
             logDirectories = new HashSet<>(instance.logDirectories);
             disableClockDrift = new Boolean(instance.disableClockDrift);
             pathOrderCounter = new Integer(instance.pathOrderCounter);
+            workDir = instance.workDir == null ? null : new String(instance.workDir);
         }
 
         /**
@@ -271,6 +280,11 @@ public class Node extends ReferableDeploymentEntity {
          */
         public LimitedBuilder disableClockDrift() {
             this.disableClockDrift = true;
+            return this;
+        }
+
+        public LimitedBuilder workDir(String workDir) {
+            this.workDir = workDir;
             return this;
         }
 
