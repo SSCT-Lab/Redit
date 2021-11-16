@@ -43,6 +43,7 @@ import io.redit.workspace.WorkspaceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -179,6 +180,17 @@ public class ReditRunner {
      */
     public void stop(boolean kill, Integer secondsUntilForcedStop) {
         logger.info("Stopping ReditRunner ...");
+        try {
+            logger.info("Deleting decompressed file...");
+            workspaceManager.deleteDecompressFile();
+            logger.info("Success delete!");
+        }catch (WorkspaceException we){
+            logger.error("Something bad occurred in Workspace Manager! ");
+        }catch (Exception ex){
+            ex.printStackTrace();
+            logger.error("Unexpected Error!");
+        }
+
         if (runtimeEngine != null) {
             runtimeEngine.stop(kill, secondsUntilForcedStop);
         }
