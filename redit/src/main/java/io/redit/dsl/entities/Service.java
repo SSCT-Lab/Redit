@@ -60,7 +60,7 @@ public class Service extends DeploymentEntity {
     private final ServiceType serviceType; // the service programming language
     private final Boolean disableClockDrift; // the flag to disable clock drift capability
     private Integer pathOrderCounter; // the counter to use for applying order to application paths
-
+    private final String workDir;
     /**
      * Private Constructor
      * @param builder the builder instance to use for creating the class instance
@@ -84,6 +84,7 @@ public class Service extends DeploymentEntity {
         environmentVariables = Collections.unmodifiableMap(builder.environmentVariables);
         pathOrderCounter = builder.pathOrderCounter;
         disableClockDrift = builder.disableClockDrift;
+        this.workDir = builder.workDir;
     }
 
     public String getDockerImage() {
@@ -149,6 +150,10 @@ public class Service extends DeploymentEntity {
         return !disableClockDrift;
     }
 
+    public String getWorkDir() {
+        return this.workDir;
+    }
+
     /**
      * The builder class to build a service object
      */
@@ -173,6 +178,7 @@ public class Service extends DeploymentEntity {
         private Boolean disableClockDrift;
         private ServiceType serviceType;
         private Integer pathOrderCounter;
+        private String workDir;
 
         /**
          * Constructor
@@ -196,6 +202,7 @@ public class Service extends DeploymentEntity {
             pathOrderCounter = 0;
             serviceType = ServiceType.OTHER;
             disableClockDrift = false;
+            this.workDir = null;
         }
 
         /**
@@ -217,9 +224,9 @@ public class Service extends DeploymentEntity {
             dockerFileAddress = new String(instance.dockerFileAddress);
             dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);
             instrumentablePaths = new HashSet<>(instance.instrumentablePaths);
-            initCommand = new String(instance.initCommand);
-            startCommand = new String(instance.startCommand);
-            stopCommand = new String(instance.stopCommand);
+            initCommand = instance.initCommand == null ? null : new String(instance.initCommand);
+            startCommand = instance.startCommand == null ? null : new String(instance.startCommand);
+            stopCommand = instance.stopCommand == null ? null : new String(instance.stopCommand);
             serviceType = instance.serviceType;
             applicationPaths = new HashMap<>(instance.applicationPaths);
             libraryPaths = new HashSet<>(instance.libraryPaths);
@@ -229,6 +236,7 @@ public class Service extends DeploymentEntity {
             environmentVariables = new HashMap<>(instance.environmentVariables);
             pathOrderCounter = new Integer(instance.pathOrderCounter);
             disableClockDrift = new Boolean(instance.disableClockDrift);
+            workDir = instance.workDir == null ? null : new String(instance.workDir);
         }
 
         public Builder(Deployment.Builder parentBuilder, String newName, Service instance) {
@@ -239,9 +247,9 @@ public class Service extends DeploymentEntity {
             dockerFileAddress = new String(instance.dockerFileAddress);
             dockerImageForceBuild = new Boolean(instance.dockerImageForceBuild);
             instrumentablePaths = new HashSet<>(instance.instrumentablePaths);
-            initCommand = instance.initCommand;
-            startCommand = instance.startCommand;
-            stopCommand = instance.stopCommand;
+            initCommand = instance.initCommand == null ? null : new String(instance.initCommand);
+            startCommand = instance.startCommand == null ? null : new String(instance.startCommand);
+            stopCommand = instance.stopCommand == null ? null : new String(instance.stopCommand);
             serviceType = instance.serviceType;
             applicationPaths = new HashMap<>(instance.applicationPaths);
             libraryPaths = new HashSet<>(instance.libraryPaths);
@@ -251,6 +259,7 @@ public class Service extends DeploymentEntity {
             environmentVariables = new HashMap<>(instance.environmentVariables);
             pathOrderCounter = new Integer(instance.pathOrderCounter);
             disableClockDrift = new Boolean(instance.disableClockDrift);
+            workDir = instance.workDir == null ? null : new String(instance.workDir);
         }
 
         /**
@@ -451,6 +460,11 @@ public class Service extends DeploymentEntity {
          */
         public Builder enableClockDrift() {
             this.disableClockDrift = false;
+            return this;
+        }
+
+        public Service.Builder workDir(String workDir) {
+            this.workDir = workDir;
             return this;
         }
 

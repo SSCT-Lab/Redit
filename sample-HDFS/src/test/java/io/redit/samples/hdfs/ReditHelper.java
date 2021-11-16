@@ -4,11 +4,8 @@ import io.redit.ReditRunner;
 import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
 import io.redit.dsl.entities.ServiceType;
-import io.redit.exceptions.DeploymentVerificationException;
 import io.redit.exceptions.RuntimeEngineException;
-import io.redit.exceptions.WorkspaceException;
-import io.redit.execution.NetOp;
-import io.redit.execution.NetPart;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,38 +14,57 @@ public class ReditHelper {
 
     public static Deployment getDeployment(int numOfDNs) {
         // fixme: service and deployment entities were modified!
+        // TODO RUN IT
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
         String dir = "hadoop-" + version;
+//        return Deployment.builder("example-hdfs")
+//                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true)
+//                .disableClockDrift().and()
+//                .withService("hadoop-base")
+//                .applicationPath("./hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
+//                .applicationPath("etc", "/hadoop/" + dir + "/etc")
+//                .environmentVariable("HADOOP_HOME", "/hadoop/" + dir).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
+//                .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
+//                .logDirectory("/hadoop/" + dir + "/logs").serviceType(ServiceType.JAVA).and()
+//
+//                .withService("nn", "hadoop-base")
+//                .initCommand("bin/hdfs namenode -bootstrapStandby")
+//                .startCommand("bin/hdfs --daemon start zkfc && bin/hdfs --daemon start namenode").tcpPort(50070)
+//                .stopCommand("bin/hdfs --daemon stop namenode").and()
+//                .nodeInstances(3, "nn", "nn", true)
+//
+//                .withService("dn", "hadoop-base")
+//                .startCommand("bin/hdfs --daemon start datanode")
+//                .stopCommand("bin/hdfs --daemon stop datanode")
+//                .and()
+//                .nodeInstances(numOfDNs, "dn", "dn", true)
+//
+//                .withService("jn", "hadoop-base")
+//                .startCommand("bin/hdfs --daemon start journalnode")
+//                .stopCommand("bin/hdfs --dae stop journalnode").and()
+//                .nodeInstances(3, "jn", "jn", false)
+//                .withNode("zk1", "zk").and()
+//
+//                .node("nn1").initCommand("bin/hdfs namenode -format && bin/hdfs zkfc -formatZK").and()
+//                .build();
         return Deployment.builder("example-hdfs")
-                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true)
-                .disableClockDrift().and()
+                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
                 .withService("hadoop-base")
-                .applicationPath("./hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
-                .applicationPath("etc", "/hadoop/" + dir + "/etc")
+                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
+                .applicationPath("etc", "/hadoop/" + dir + "/etc").workDir("/hadoop/" + dir)
                 .environmentVariable("HADOOP_HOME", "/hadoop/" + dir).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .logDirectory("/hadoop/" + dir + "/logs").serviceType(ServiceType.JAVA).and()
-
-                .withService("nn", "hadoop-base")
-                .initCommand("bin/hdfs namenode -bootstrapStandby")
+                .withService("nn", "hadoop-base").initCommand("bin/hdfs namenode -bootstrapStandby")
                 .startCommand("bin/hdfs --daemon start zkfc && bin/hdfs --daemon start namenode").tcpPort(50070)
-                .stopCommand("bin/hdfs --daemon stop namenode").and()
-                .nodeInstances(3, "nn", "nn", true)
-
+                .stopCommand("bin/hdfs --daemon stop namenode").and().nodeInstances(3, "nn", "nn", true)
                 .withService("dn", "hadoop-base")
-                .startCommand("bin/hdfs --daemon start datanode")
-                .stopCommand("bin/hdfs --daemon stop datanode")
-                .and()
-                .nodeInstances(numOfDNs, "dn", "dn", true)
-
+                .startCommand("bin/hdfs --daemon start datanode").stopCommand("bin/hdfs --daemon stop datanode")
+                .and().nodeInstances(numOfDNs, "dn", "dn", true)
                 .withService("jn", "hadoop-base")
-                .startCommand("bin/hdfs --daemon start journalnode")
-                .stopCommand("bin/hdfs --dae stop journalnode").and()
-                .nodeInstances(3, "jn", "jn", false)
-                .withNode("zk1", "zk").and()
-
-                .node("nn1").initCommand("bin/hdfs namenode -format && bin/hdfs zkfc -formatZK").and()
-                .build();
+                .startCommand("bin/hdfs --daemon start journalnode").stopCommand("bin/hdfs --dae stop journalnode").and()
+                .nodeInstances(3, "jn", "jn", false).withNode("zk1", "zk").and()
+                .node("nn1").initCommand("bin/hdfs namenode -format && bin/hdfs zkfc -formatZK").and().build();
     }
 
     public static void startNodesInOrder(ReditRunner runner) throws InterruptedException, RuntimeEngineException {
