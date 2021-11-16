@@ -13,8 +13,8 @@ public class ReditHelper {
     public static final Logger logger = LoggerFactory.getLogger(ReditHelper.class);
 
     public static Deployment getDeployment(int numOfDNs) {
-        // fixme: service and deployment entities were modified!
-        // TODO RUN IT
+
+        // TODO find way to change bash-running working directory, check is the code really running
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
         String dir = "hadoop-" + version;
         String tmpdir="/hadoop/hadoop-3.1.2/";
