@@ -185,19 +185,12 @@ public class WorkspaceManager {
         Path decompressedDirectory = workingDirectory.resolve(Constants.DECOMPRESSED_DIRECTORIES_ROOT_NAME);
         try (Stream<Path> walk = Files.walk(decompressedDirectory)) {
             walk.sorted(Comparator.reverseOrder())
-                    .forEach(WorkspaceManager::deleteDirectoryStream);
+                    .forEach(FileUtil::deleteDirectoryStream);
         }
         catch (Exception e){
             e.printStackTrace();
         }
 
-    }
-    private static void deleteDirectoryStream(Path path) {
-        try {
-            Files.delete(path);
-        } catch (IOException e) {
-            System.err.printf("Can't delete %s%n%s", path, e);
-        }
     }
 
     public NodeWorkspace createNodeWorkspace(Node node)

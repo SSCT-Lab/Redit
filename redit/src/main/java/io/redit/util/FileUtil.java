@@ -193,4 +193,12 @@ public class FileUtil {
 
         return matched;
     }
+
+    public static void deleteDirectoryStream(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            System.err.printf("Can't delete %s%n%s", path, e);
+        }
+    }
 }
