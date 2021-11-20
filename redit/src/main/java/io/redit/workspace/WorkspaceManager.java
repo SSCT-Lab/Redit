@@ -41,9 +41,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WorkspaceManager {
     private final static Logger logger = LoggerFactory.getLogger(WorkspaceManager.class);
@@ -177,22 +175,7 @@ public class WorkspaceManager {
         return retMap;
     }
 
-    /**
-     *
-     */
-
-    public void deleteDecompressFile() throws WorkspaceException{
-        Path decompressedDirectory = workingDirectory.resolve(Constants.DECOMPRESSED_DIRECTORIES_ROOT_NAME);
-        try (Stream<Path> walk = Files.walk(decompressedDirectory)) {
-            walk.sorted(Comparator.reverseOrder())
-                    .forEach(FileUtil::deleteDirectoryStream);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
+    // TODO should this be public?
     public NodeWorkspace createNodeWorkspace(Node node)
             throws WorkspaceException {
         logger.info("Creating workspace for node {}", node.getName());

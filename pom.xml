@@ -33,7 +33,7 @@
         <module>sample-multithread</module>
         <module>sample-scala</module>
         <module>sample-HDFS</module>
-        <module>sample-HDFS-balancer</module>
+        <module>sample-HDFS-lease</module>
     </modules>
 
 </project>

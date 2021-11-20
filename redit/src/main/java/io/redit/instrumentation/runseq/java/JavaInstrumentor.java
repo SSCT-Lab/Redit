@@ -89,7 +89,7 @@ public class JavaInstrumentor implements Instrumentor {
         }
 //TODO ASPECTJ_HOME is hard to set
         String aspectJHome = System.getenv("ASPECTJ_HOME");
-
+        System.out.println("ASPECTJ_HOME: " + aspectJHome);
         if (aspectJHome == null) {
             throw new InstrumentationException("ASPECTJ_HOME variable is not defined!");
         }

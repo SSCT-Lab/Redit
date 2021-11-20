@@ -206,12 +206,6 @@ public abstract class RuntimeEngine implements LimitedRuntimeEngine {
         return ports;
     }
 
-    protected String getNodeWorkDir(String nodeName) {
-        Node node = this.nodeMap.get(nodeName);
-        Service nodeService = this.deployment.getService(node.getServiceName());
-        return node.getWorkDir() != null ? node.getWorkDir() : nodeService.getWorkDir();
-    }
-
     protected String getNodeInitCommand(String nodeName) {
         Node node = nodeMap.get(nodeName);
         Service nodeService = deployment.getService(node.getServiceName());

@@ -321,10 +321,6 @@ public class SingleNodeRuntimeEngine extends RuntimeEngine {
             envList.add(envEntry.getKey() + "=" + envEntry.getValue());
         }
         containerConfigBuilder.env(envList);
-        if (this.getNodeWorkDir(node.getName()) != null) {
-            containerConfigBuilder.workingDir(this.getNodeWorkDir(node.getName()));
-        }
-
         // Creates the wrapper script and adds a bind mount for it
         String wrapperFile = createWrapperScriptForNode(node);
         String wrapperScriptAddress = DockerUtil.mapDockerPathToHostPath(dockerClient, clientContainerId,
