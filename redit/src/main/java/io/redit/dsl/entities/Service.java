@@ -26,6 +26,7 @@
 package io.redit.dsl.entities;
 
 import io.redit.Constants;
+import io.redit.exceptions.PathNotFoundException;
 import io.redit.util.FileUtil;
 import io.redit.dsl.DeploymentEntity;
 import org.apache.commons.io.FilenameUtils;
@@ -388,6 +389,76 @@ public class Service extends DeploymentEntity {
             this.applicationPaths.put(path, new PathEntry(
                         path, targetPath, isLibrary, willBeChanged, shouldBeDecompressed, pathOrderCounter++)); // TODO Make this thread-safe
             return this;
+        }
+
+        public Builder addSettingsToXml(String path, String targetPath, HashMap<String, String> map) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+            if (!new File(path).exists()) {
+                throw new PathNotFoundException(path);
+            }
+            path = Paths.get(path).toAbsolutePath().normalize().toString();
+            System.out.println("path: " + path);
+
+            if (!FileUtil.isPathAbsoluteInUnix(targetPath)) {
+                throw new RuntimeException("The target path `" + path + "` is not absolute!");
+            }
+            targetPath = FilenameUtils.normalizeNoEndSeparator(targetPath, true);
+            System.out.println("targetPath: " + targetPath);
+
+            String xmlString = turnDocumentToString(path, map);
+            turnStringToDocument(xmlString, path);
+
+            this.applicationPaths.put(path, new PathEntry(
+                    path, targetPath, false, true, false, pathOrderCounter++)); // TODO Make this thread-safe
+
+            return this;
+        }
+
+        private void turnStringToDocument(String xmlString, String targetPath) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+            StringReader sr = new StringReader(xmlString);
+            InputSource is = new InputSource(sr);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder=factory.newDocumentBuilder();
+            Document doc = builder.parse(is);
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer transformer = transFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            File newXML = new File(targetPath);
+            if(!newXML.exists()){
+                newXML.createNewFile();
+            }
+            FileOutputStream os = new FileOutputStream(newXML);
+            StreamResult result = new StreamResult(os);
+            transformer.transform(source, result);
+
+        }
+
+        private String turnDocumentToString(String path, HashMap<String, String> map) {
+            try {
+                // 读取 xml 文件
+                System.out.println("read xml: " + path);
+                File fileInput = new File(path);
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(fileInput);
+                DOMSource domSource = new DOMSource(doc);
+                StringWriter writer = new StringWriter();
+                StreamResult result = new StreamResult(writer);
+                TransformerFactory tf = TransformerFactory.newInstance();
+                Transformer transformer = tf.newTransformer();
+                transformer.transform(domSource, result);
+
+                String str = writer.toString();
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    str = str.replace("{{" + entry.getKey() + "}}", entry.getValue());
+                }
+
+                return str;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         
 

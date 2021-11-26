@@ -40,7 +40,6 @@ public class ReditHelper {
 
     private static final String CLUSTER_NAME = "mycluster";
     private static final int NN_HTTP_PORT = 50070;
-//    private static final int NN_HTTP_PORT = 9870;
     private static final int NN_RPC_PORT = 8020;
 
     private int numOfDNs;
@@ -84,13 +83,13 @@ public class ReditHelper {
                 .withService("hadoop-base")
                 .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())
-//                .addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
-//                        new HashMap<String, String>() {{
-//                            put("NN_STRING", getNNString());
-//                            put("NN_ADDRESSES", getNNAddresses());
-//                        }})
-//                .addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
-//                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }})
+                .addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
+                        new HashMap<String, String>() {{
+                            put("NN_STRING", getNNString());
+                            put("NN_ADDRESSES", getNNAddresses());
+                        }})
+                .addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
+                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }})
                 .environmentVariable("HADOOP_HOME", getHadoopHomeDir()).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .libraryPath(getHadoopHomeDir() + "/share/hadoop/**/*.jar")
@@ -99,24 +98,25 @@ public class ReditHelper {
         addRuntimeLibsToDeployment(builder, getHadoopHomeDir());
 
         builder.withService("nn", "hadoop-base").tcpPort(NN_HTTP_PORT, NN_RPC_PORT)
-                .initCommand(getHadoopHomeDir() + "bin/hdfs namenode -bootstrapStandby")
-                .startCommand(getHadoopHomeDir() + "bin/hdfs --daemon start zkfc && " + getHadoopHomeDir() + "bin/hdfs --daemon start namenode")
-                .stopCommand(getHadoopHomeDir() + "bin/hdfs --daemon stop namenode").and()
+                .initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -bootstrapStandby")
+                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start zkfc && " + getHadoopHomeDir() + "/bin/hdfs --daemon start namenode")
+                .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop namenode").and()
                 .nodeInstances(numOfNNs, "nn", "nn", true)
                 .withService("dn", "hadoop-base")
-                .startCommand(getHadoopHomeDir() + "bin/hdfs --daemon start datanode")
-                .stopCommand(getHadoopHomeDir() + "bin/hdfs --daemon stop datanode").and()
+                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start datanode")
+                .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop datanode").and()
                 .nodeInstances(numOfDNs, "dn", "dn", true)
                 .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1");
 
         if (numOfNNs > 1) {
             builder.withService("jn", "hadoop-base")
-                    .startCommand(getHadoopHomeDir() + "bin/hdfs --daemon start journalnode")
-                    .stopCommand(getHadoopHomeDir() + "bin/hdfs --daemon stop journalnode").and()
+                    .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start journalnode")
+                    .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop journalnode").and()
                     .nodeInstances(numOfJNs, "jn", "jn", false);
         }
 
-        builder.node("nn1").initCommand(getHadoopHomeDir() + "bin/hdfs namenode -format && " + getHadoopHomeDir() + "bin/hdfs zkfc -formatZK").and();
+        builder.withNode("zk1", "zk").and();
+        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -format && " + getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK").and();
 
         deploymentBuiler = builder;
     }
@@ -136,7 +136,6 @@ public class ReditHelper {
     public ReditRunner start() throws RuntimeEngineException, ParserConfigurationException, IOException, SAXException, TransformerException {
         deployment = deploymentBuiler.build();
         runner = ReditRunner.run(deployment);
-        initXml();
         startNodesInOrder();
         return runner;
     }
@@ -307,7 +306,7 @@ public class ReditHelper {
 
     public void transitionToActive(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to ACTIVE", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, "bin/hdfs haadmin -transitionToActive nn" + nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToActive nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to ACTIVE.\n" + res.stdErr());
         }
@@ -315,87 +314,10 @@ public class ReditHelper {
 
     public void transitionToStandby(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to STANDBY", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, "bin/hdfs haadmin -transitionToStandby nn" + nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
         }
     }
 
-    public void initXml() throws ParserConfigurationException, TransformerException, SAXException, IOException {
-        String fsAddress = numOfNNs > 1 ? CLUSTER_NAME : "nn1:" + NN_RPC_PORT;
-        String hdfsSiteFileName = numOfNNs > 1 ? "hdfs-site-ha.xml" : "hdfs-site.xml";
-        addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
-                new HashMap<String, String>() {{
-                    put("NN_STRING", getNNString());
-                    put("NN_ADDRESSES", getNNAddresses());
-                }});
-        addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
-                new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }});
-    }
-
-    public void addSettingsToXml(String path, String targetPath, HashMap<String, String> map) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-
-        if (!new File(path).exists()) {
-            throw new PathNotFoundException(path);
-        }
-        path = Paths.get(path).toAbsolutePath().normalize().toString();
-        System.out.println("path: " + path);
-
-        if (!FileUtil.isPathAbsoluteInUnix(targetPath)) {
-            throw new RuntimeException("The target path `" + path + "` is not absolute!");
-        }
-        targetPath = FilenameUtils.normalizeNoEndSeparator(targetPath, true);
-        System.out.println("targetPath: " + targetPath);
-
-        String xmlString = turnDocumentToString(path, map);
-        turnStringToDocument(xmlString, targetPath);
-
-    }
-
-    private void turnStringToDocument(String xmlString, String targetPath) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-
-        StringReader sr = new StringReader(xmlString);
-        InputSource is = new InputSource(sr);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder=factory.newDocumentBuilder();
-        Document doc = builder.parse(is);
-        TransformerFactory transFactory = TransformerFactory.newInstance();
-        Transformer transformer = transFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-        File newXML = new File(targetPath);
-        if(!newXML.exists()){
-            newXML.createNewFile();
-        }
-        FileOutputStream os = new FileOutputStream(newXML);
-        StreamResult result = new StreamResult(os);
-        transformer.transform(source, result);
-
-    }
-
-    private String turnDocumentToString(String path, HashMap<String, String> map) {
-        try {
-            // 读取 xml 文件
-            System.out.println("read xml: " + path);
-            File fileInput = new File(path);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fileInput);
-            DOMSource domSource = new DOMSource(doc);
-            StringWriter writer = new StringWriter();
-            StreamResult result = new StreamResult(writer);
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.transform(domSource, result);
-
-            String str = writer.toString();
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                str = str.replace("{{" + entry.getKey() + "}}", entry.getValue());
-            }
-
-            return str;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
