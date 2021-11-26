@@ -14,7 +14,10 @@ import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.TimeoutException;
@@ -44,7 +47,7 @@ public class SampleTest {
      */
     @Test
     public void testFailoverRightBeforeCommitSynchronization()
-            throws IOException, RuntimeEngineException, InterruptedException, TimeoutException {
+            throws IOException, RuntimeEngineException, InterruptedException, TimeoutException, TransformerException, SAXException, ParserConfigurationException {
         final Configuration conf = new Configuration();
         // Disable permissions so that another user can recover the lease.
         conf.setBoolean(DFSConfigKeys.DFS_PERMISSIONS_ENABLED_KEY, false);

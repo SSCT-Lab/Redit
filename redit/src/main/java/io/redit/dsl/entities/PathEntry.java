@@ -31,6 +31,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 /**
  * All of the application paths defined in each service or node is an instance on this class to be used by the workspace
@@ -44,7 +45,6 @@ public class PathEntry {
     private final Boolean shouldBeDecompressed; // if this path needs to be decompressed e.g. a zip file
     private final Integer order; // the order in which the paths will be applied when being added to the container. it is
                                  // important for the overlapping target paths
-
     /**
      * Constructor
      * @param path the local path to be added to the node's container
@@ -77,6 +77,7 @@ public class PathEntry {
         this.shouldBeDecompressed = shouldBeDecompressed;
         this.order = order;
     }
+    
 
     public String getPath() {
         return path;

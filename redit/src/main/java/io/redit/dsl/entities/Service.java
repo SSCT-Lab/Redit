@@ -31,7 +31,20 @@ import io.redit.dsl.DeploymentEntity;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -376,6 +389,7 @@ public class Service extends DeploymentEntity {
                         path, targetPath, isLibrary, willBeChanged, shouldBeDecompressed, pathOrderCounter++)); // TODO Make this thread-safe
             return this;
         }
+        
 
         /**
          * Marks an absolute target path in container of a node created out of this service as a library path. This is
@@ -492,6 +506,9 @@ public class Service extends DeploymentEntity {
         protected void returnToParent(Service builtObj) {
             parentBuilder.service(builtObj);
         }
+
+
+
     }
 
 

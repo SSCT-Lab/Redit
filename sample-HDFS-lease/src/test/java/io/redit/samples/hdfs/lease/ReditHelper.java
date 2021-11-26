@@ -5,17 +5,32 @@ import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
 import io.redit.dsl.entities.ServiceType;
 import io.redit.dsl.entities.PortType;
+import io.redit.exceptions.PathNotFoundException;
 import io.redit.exceptions.RuntimeEngineException;
 import io.redit.execution.CommandResults;
+import io.redit.util.FileUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import java.io.File;
-import java.io.IOException;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.net.InetSocketAddress;
+import java.nio.file.Paths;
 import java.util.*;
 
 
@@ -35,7 +50,7 @@ public class ReditHelper {
     private Deployment deployment;
     private Deployment.Builder deploymentBuiler;
 
-    public ReditHelper(int numOfNNs, int numOfDNs, int numOfJNs) {
+    public ReditHelper(int numOfNNs, int numOfDNs, int numOfJNs) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         this.numOfDNs = numOfDNs;
         this.numOfNNs = numOfNNs;
         this.numOfJNs = numOfJNs;
@@ -59,7 +74,7 @@ public class ReditHelper {
         }
     }
 
-    private void createDeployment() {
+    private void createDeployment() throws ParserConfigurationException, TransformerException, SAXException, IOException {
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
         String dir = "hadoop-" + version;
         String fsAddress = numOfNNs > 1 ? CLUSTER_NAME : "nn1:" + NN_RPC_PORT;
@@ -67,15 +82,15 @@ public class ReditHelper {
         Deployment.Builder builder = Deployment.builder("example-hdfs-lease")
                 .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
                 .withService("hadoop-base")
-                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
+                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())
-                .applicationPath("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
-                        new HashMap<String, String>() {{
-                            put("NN_STRING", getNNString());
-                            put("NN_ADDRESSES", getNNAddresses());
-                        }})
-                .applicationPath("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
-                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }})
+//                .addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
+//                        new HashMap<String, String>() {{
+//                            put("NN_STRING", getNNString());
+//                            put("NN_ADDRESSES", getNNAddresses());
+//                        }})
+//                .addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
+//                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }})
                 .environmentVariable("HADOOP_HOME", getHadoopHomeDir()).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .libraryPath(getHadoopHomeDir() + "/share/hadoop/**/*.jar")
@@ -106,6 +121,7 @@ public class ReditHelper {
         deploymentBuiler = builder;
     }
 
+
     //Add the runtime library to the deployment
     private void addRuntimeLibsToDeployment(Deployment.Builder builder, String hadoopHome) {
         for (String cpItem: System.getProperty("java.class.path").split(":")) {
@@ -117,9 +133,10 @@ public class ReditHelper {
         }
     }
 
-    public ReditRunner start() throws RuntimeEngineException {
+    public ReditRunner start() throws RuntimeEngineException, ParserConfigurationException, IOException, SAXException, TransformerException {
         deployment = deploymentBuiler.build();
         runner = ReditRunner.run(deployment);
+        initXml();
         startNodesInOrder();
         return runner;
     }
@@ -139,6 +156,7 @@ public class ReditHelper {
             }
 
             runner.runtime().startNode("nn1");
+
             for (int retry=6; retry>0; retry--) {
                 Thread.sleep(5000);
                 if (isNNUp(1)) break;
@@ -300,6 +318,84 @@ public class ReditHelper {
         CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, "bin/hdfs haadmin -transitionToStandby nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
+        }
+    }
+
+    public void initXml() throws ParserConfigurationException, TransformerException, SAXException, IOException {
+        String fsAddress = numOfNNs > 1 ? CLUSTER_NAME : "nn1:" + NN_RPC_PORT;
+        String hdfsSiteFileName = numOfNNs > 1 ? "hdfs-site-ha.xml" : "hdfs-site.xml";
+        addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
+                new HashMap<String, String>() {{
+                    put("NN_STRING", getNNString());
+                    put("NN_ADDRESSES", getNNAddresses());
+                }});
+        addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
+                new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }});
+    }
+
+    public void addSettingsToXml(String path, String targetPath, HashMap<String, String> map) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+        if (!new File(path).exists()) {
+            throw new PathNotFoundException(path);
+        }
+        path = Paths.get(path).toAbsolutePath().normalize().toString();
+        System.out.println("path: " + path);
+
+        if (!FileUtil.isPathAbsoluteInUnix(targetPath)) {
+            throw new RuntimeException("The target path `" + path + "` is not absolute!");
+        }
+        targetPath = FilenameUtils.normalizeNoEndSeparator(targetPath, true);
+        System.out.println("targetPath: " + targetPath);
+
+        String xmlString = turnDocumentToString(path, map);
+        turnStringToDocument(xmlString, targetPath);
+
+    }
+
+    private void turnStringToDocument(String xmlString, String targetPath) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+        StringReader sr = new StringReader(xmlString);
+        InputSource is = new InputSource(sr);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder=factory.newDocumentBuilder();
+        Document doc = builder.parse(is);
+        TransformerFactory transFactory = TransformerFactory.newInstance();
+        Transformer transformer = transFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        File newXML = new File(targetPath);
+        if(!newXML.exists()){
+            newXML.createNewFile();
+        }
+        FileOutputStream os = new FileOutputStream(newXML);
+        StreamResult result = new StreamResult(os);
+        transformer.transform(source, result);
+
+    }
+
+    private String turnDocumentToString(String path, HashMap<String, String> map) {
+        try {
+            // 读取 xml 文件
+            System.out.println("read xml: " + path);
+            File fileInput = new File(path);
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(fileInput);
+            DOMSource domSource = new DOMSource(doc);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.transform(domSource, result);
+
+            String str = writer.toString();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                str = str.replace("{{" + entry.getKey() + "}}", entry.getValue());
+            }
+
+            return str;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

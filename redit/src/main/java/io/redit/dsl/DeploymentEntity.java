@@ -24,6 +24,10 @@
  */
 package io.redit.dsl;
 
+import io.redit.dsl.entities.Service;
+
+import java.util.HashMap;
+
 /**
  * All of the entities in the deployment definition should extend this class
  */
@@ -93,5 +97,6 @@ public abstract class DeploymentEntity {
          * @param builtObj
          */
         protected abstract void returnToParent(T builtObj);
+
     }
 }
