@@ -106,7 +106,15 @@ public class ReditHelper {
                 .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start datanode")
                 .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop datanode").and()
                 .nodeInstances(numOfDNs, "dn", "dn", true)
-                .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1");
+                .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1")
+                .node("nn1")
+                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
+                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
+                .stackTrace("e3",
+                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
+                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
+                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
+                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");;
 
         if (numOfNNs > 1) {
             builder.withService("jn", "hadoop-base")
@@ -116,7 +124,7 @@ public class ReditHelper {
         }
 
         builder.withNode("zk1", "zk").and();
-        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -format && " + getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK").and();
+        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK && " + getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
 
         deploymentBuiler = builder;
     }
@@ -133,7 +141,7 @@ public class ReditHelper {
         }
     }
 
-    public ReditRunner start() throws RuntimeEngineException, ParserConfigurationException, IOException, SAXException, TransformerException {
+    public ReditRunner start() throws RuntimeEngineException, InterruptedException {
         deployment = deploymentBuiler.build();
         runner = ReditRunner.run(deployment);
         startNodesInOrder();
@@ -146,36 +154,31 @@ public class ReditHelper {
         }
     }
 
-    public void startNodesInOrder() throws RuntimeEngineException {
-        try {
-
-            if (numOfNNs > 1) {
-                // wait for journal nodes to come up
-                Thread.sleep(10000);
-            }
-
-            runner.runtime().startNode("nn1");
-
-            for (int retry=6; retry>0; retry--) {
-                Thread.sleep(5000);
-                if (isNNUp(1)) break;
-                if (retry == 1) {
-                    throw new RuntimeException("NN nn1 is not UP after 30 seconds");
-                }
-            }
-
-            if (numOfNNs > 1) {
-                for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
-                    runner.runtime().startNode("nn" + nnIndex);
-                }
-            }
-
-            for (String node : runner.runtime().nodeNames())
-                if (node.startsWith("dn")) runner.runtime().startNode(node);
-        } catch (InterruptedException e) {
-            logger.warn("startNodesInOrder sleep got interrupted");
+    public void startNodesInOrder() throws RuntimeEngineException, InterruptedException {
+        if (numOfNNs > 1) {
+            // wait for journal nodes to come up
+            Thread.sleep(10000);
         }
+
+        runner.runtime().startNode("nn1");
+
+//        for (int retry=6; retry>0; retry--) {
+//            Thread.sleep(5000);
+//            if (isNNUp(1)) break;
+//            if (retry == 1) {
+//                throw new RuntimeException("NN nn1 is not UP after 30 seconds");
+//            }
+//        }
+        Thread.sleep(10000);
+        if (numOfNNs > 1) {
+            for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
+                runner.runtime().startNode("nn" + nnIndex);
+            }
+        }
+        for (String node : runner.runtime().nodeNames())
+            if (node.startsWith("dn")) runner.runtime().startNode(node);
     }
+
 
     private String getNNString() {
         StringJoiner stringJoiner = new StringJoiner(",");
