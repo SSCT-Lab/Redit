@@ -25,4 +25,4 @@ target/
 docs/_build
 
 dependency-reduced-pom.xml
-aspectj-1.9.6
+/aspectj-1.9.6/
