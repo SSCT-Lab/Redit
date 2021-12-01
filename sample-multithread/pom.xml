@@ -56,17 +56,17 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>1.8.2</version>
+            <version>1.9.6</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.8.2</version>
+            <version>1.9.6</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjtools</artifactId>
-            <version>1.8.2</version>
+            <version>1.9.6</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
