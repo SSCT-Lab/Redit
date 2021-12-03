@@ -30,11 +30,11 @@
     <modules>
         <module>reditrt</module>
         <module>redit</module>
-        <module>sample-multithread</module>
-        <module>sample-scala</module>
-        <module>sample-HDFS</module>
-        <module>sample-HDFS-lease</module>
-        <module>sample-HDFS-test</module>
+        <module>sample/sample-multithread</module>
+        <module>sample/sample-scala</module>
+        <module>sample/sample-HDFS</module>
+        <module>sample/sample-HDFS-lease</module>
+        <module>sample/sample-HDFS-test</module>
     </modules>
 
 </project>
