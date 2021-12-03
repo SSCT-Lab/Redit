@@ -6,6 +6,7 @@ import io.redit.dsl.entities.PathAttr;
 import io.redit.dsl.entities.PortType;
 import io.redit.dsl.entities.ServiceType;
 import io.redit.exceptions.RuntimeEngineException;
+import io.redit.execution.CommandResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.hadoop.conf.Configuration;
@@ -31,7 +32,6 @@ public class ReditHelper {
     private static int numOfNNs = 3;
     private static int numOfDNs = 3;
     private static int numOfJNs = 3;
-    private static Deployment.Builder deploymentBuiler;
 
     private static String getHadoopHomeDir() {
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
@@ -46,7 +46,7 @@ public class ReditHelper {
         String fsAddress = numOfNNs > 1 ? CLUSTER_NAME : "nn1:" + NN_RPC_PORT;
         String hdfsSiteFileName = numOfNNs > 1 ? "hdfs-site-ha.xml" : "hdfs-site.xml";
         Deployment.Builder builder = Deployment.builder("example-hdfs-lease")
-                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
+//                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
                 .withService("hadoop-base")
                 .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())
@@ -66,7 +66,8 @@ public class ReditHelper {
 
         builder.withService("nn", "hadoop-base").tcpPort(NN_HTTP_PORT, NN_RPC_PORT)
                 .initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -bootstrapStandby")
-                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start zkfc && " + getHadoopHomeDir() + "/bin/hdfs --daemon start namenode")
+//                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start zkfc && " + getHadoopHomeDir() + "/bin/hdfs --daemon start namenode")
+                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start namenode")
                 .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop namenode").and()
                 .nodeInstances(numOfNNs, "nn", "nn", true)
                 .withService("dn", "hadoop-base")
@@ -82,9 +83,21 @@ public class ReditHelper {
                     .nodeInstances(numOfJNs, "jn", "jn", false);
         }
 
+//        builder.withNode("zk1", "zk").and();
+//        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK && " + getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
+        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
+
         addInstrumentablePath(builder, "/share/hadoop/hdfs/hadoop-hdfs-3.1.2.jar");
-        builder.withNode("zk1", "zk").and();
-        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK && " + getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
+
+        //TODO if add this , nn2 can not up. if not add, Event t1 is not a defined test case event and cannot be enforced using this method!
+//        builder.node("nn1")
+//                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
+//                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
+//                .stackTrace("e3",
+//                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
+//                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
+//                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
+//                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");
 
         return builder.build();
     }
@@ -110,7 +123,7 @@ public class ReditHelper {
     public static void startNodesInOrder(ReditRunner runner) throws InterruptedException, RuntimeEngineException {
         if (numOfNNs > 1) {
             // wait for journal nodes to come up
-            Thread.sleep(15000);
+            Thread.sleep(10000);
         }
         runner.runtime().startNode("nn1");
         Thread.sleep(10000);
@@ -210,11 +223,11 @@ public class ReditHelper {
     }
 
 
-    public FileSystem getFileSystem(ReditRunner runner) throws IOException {
+    public static FileSystem getFileSystem(ReditRunner runner) throws IOException {
         return FileSystem.get(getConfiguration(runner));
     }
 
-    public Configuration getConfiguration(ReditRunner runner) {
+    public static Configuration getConfiguration(ReditRunner runner) {
         Configuration conf = new Configuration();
         conf.set("fs.defaultFS", "hdfs://" + CLUSTER_NAME);
         conf.set("dfs.client.failover.proxy.provider."+ CLUSTER_NAME,
@@ -231,6 +244,22 @@ public class ReditHelper {
         }
 
         return conf;
+    }
+
+    public static void transitionToActive(int nnNum, ReditRunner runner) throws RuntimeEngineException {
+        logger.info("Transitioning nn{} to ACTIVE", nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToActive nn" + nnNum);
+        if (res.exitCode() != 0) {
+            throw new RuntimeException("Error while transitioning nn" + nnNum + " to ACTIVE.\n" + res.stdErr());
+        }
+    }
+
+    public static void transitionToStandby(int nnNum, ReditRunner runner) throws RuntimeEngineException {
+        logger.info("Transitioning nn{} to STANDBY", nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby nn" + nnNum);
+        if (res.exitCode() != 0) {
+            throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
+        }
     }
 
 }
