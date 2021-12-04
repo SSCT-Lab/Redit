@@ -1,55 +1,45 @@
-package io.redit.samples.hdfs.lease;
+package io.redit.samples.hdfs.lease.paper.prototype;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
 import io.redit.ReditRunner;
 import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
-import io.redit.dsl.entities.ServiceType;
 import io.redit.dsl.entities.PortType;
+import io.redit.dsl.entities.ServiceType;
 import io.redit.exceptions.RuntimeEngineException;
 import io.redit.execution.CommandResults;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Paths;
 import java.util.*;
 
-
 public class ReditHelper {
-
     public static final Logger logger = LoggerFactory.getLogger(ReditHelper.class);
 
     private static final String CLUSTER_NAME = "mycluster";
-    private static final int NN_HTTP_PORT = 50070;
+    private static final int NN_HTTP_PORT = 9870;
     private static final int NN_RPC_PORT = 8020;
 
     private int numOfDNs;
     private int numOfNNs;
-    private int numOfJNs;
     private ReditRunner runner;
     private Deployment deployment;
     private Deployment.Builder deploymentBuiler;
 
-    public ReditHelper(int numOfNNs, int numOfDNs, int numOfJNs) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+    // todo Is throwing exception instead of solving them locally a best practicing?
+    public ReditHelper(int numOfNNs, int numOfDNs) throws ParserConfigurationException, IOException, SAXException, TransformerException{
         this.numOfDNs = numOfDNs;
         this.numOfNNs = numOfNNs;
-        this.numOfJNs = numOfJNs;
         createDeployment();
     }
 
@@ -70,15 +60,14 @@ public class ReditHelper {
         }
     }
 
-    private void createDeployment() throws ParserConfigurationException, TransformerException, SAXException, IOException {
-        String version = "3.1.2"; // this can be dynamically generated from maven metadata
-        String dir = "hadoop-" + version;
+    private void createDeployment() throws ParserConfigurationException, TransformerException, SAXException, IOException{
         String fsAddress = numOfNNs > 1 ? CLUSTER_NAME : "nn1:" + NN_RPC_PORT;
         String hdfsSiteFileName = numOfNNs > 1 ? "hdfs-site-ha.xml" : "hdfs-site.xml";
-        Deployment.Builder builder = Deployment.builder("example-hdfs-lease")
-                .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
+        String version = "3.1.2"; // this can be dynamically generated from maven metadata
+        String dir = "hadoop-" + version;
+        Deployment.Builder builder = Deployment.builder("example-hdfs")
                 .withService("hadoop-base")
-                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
+                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())
                 .addSettingsToXml("etc/" + hdfsSiteFileName, getHadoopHomeDir() + "/etc/hadoop/hdfs-site.xml",
                         new HashMap<String, String>() {{
@@ -95,43 +84,27 @@ public class ReditHelper {
         addRuntimeLibsToDeployment(builder, getHadoopHomeDir());
 
         builder.withService("nn", "hadoop-base").tcpPort(NN_HTTP_PORT, NN_RPC_PORT)
-                .initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -bootstrapStandby")
-                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start zkfc && " + getHadoopHomeDir() + "/bin/hdfs --daemon start namenode")
-                .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop namenode").and()
+                .initCommand("bin/hdfs namenode -bootstrapStandby")
+                .startCommand("bin/hdfs --daemon start namenode")
+                .stopCommand("bin/hdfs --daemon stop namenode").and()
                 .nodeInstances(numOfNNs, "nn", "nn", true)
                 .withService("dn", "hadoop-base")
-                .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start datanode")
-                .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop datanode").and()
-                .nodeInstances(numOfDNs, "dn", "dn", true)
+                .startCommand("bin/hdfs --daemon start datanode").stopCommand("bin/hdfs --daemon stop datanode")
+                .and().nodeInstances(numOfDNs, "dn", "dn", true)
                 .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1");
 
-
         if (numOfNNs > 1) {
-            builder.withService("jn", "hadoop-base")
-                    .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start journalnode")
-                    .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop journalnode").and()
-                    .nodeInstances(numOfJNs, "jn", "jn", false);
+            builder.withService("jn", "hadoop-base").startCommand("bin/hdfs --daemon start journalnode")
+                    .stopCommand("bin/hdfs --daemon stop journalnode").and().nodeInstances(3, "jn", "jn", false);
         }
 
-        builder.withNode("zk1", "zk").and();
-        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK && " + getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
+        builder.node("nn1").initCommand("bin/hdfs namenode -format").and();
 
         deploymentBuiler = builder;
     }
 
+    public ReditRunner start() throws RuntimeEngineException {
 
-    //Add the runtime library to the deployment
-    private void addRuntimeLibsToDeployment(Deployment.Builder builder, String hadoopHome) {
-        for (String cpItem: System.getProperty("java.class.path").split(":")) {
-            if (cpItem.contains("aspectjrt") || cpItem.contains("reditrt")) {
-                String fileName = new File(cpItem).getName();
-                builder.service("hadoop-base")
-                        .applicationPath(cpItem, hadoopHome + "/share/hadoop/common/" + fileName, PathAttr.LIBRARY).and();
-            }
-        }
-    }
-
-    public ReditRunner start() throws RuntimeEngineException, InterruptedException {
         deployment = deploymentBuiler.build();
         runner = ReditRunner.run(deployment);
         startNodesInOrder();
@@ -144,31 +117,48 @@ public class ReditHelper {
         }
     }
 
-    public void startNodesInOrder() throws RuntimeEngineException, InterruptedException {
-        if (numOfNNs > 1) {
-            // wait for journal nodes to come up
-            Thread.sleep(10000);
-        }
-
-        runner.runtime().startNode("nn1");
-
-//        for (int retry=6; retry>0; retry--) {
-//            Thread.sleep(5000);
-//            if (isNNUp(1)) break;
-//            if (retry == 1) {
-//                throw new RuntimeException("NN nn1 is not UP after 30 seconds");
-//            }
-//        }
-        Thread.sleep(10000);
-        if (numOfNNs > 1) {
-            for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
-                runner.runtime().startNode("nn" + nnIndex);
+    private void addRuntimeLibsToDeployment(Deployment.Builder builder, String hadoopHome) {
+        for (String cpItem: System.getProperty("java.class.path").split(":")) {
+            if (cpItem.contains("aspectjrt") || cpItem.contains("reditrt")) {
+                String fileName = new File(cpItem).getName();
+                builder.service("hadoop-base")
+                        .applicationPath(cpItem, hadoopHome + "/share/hadoop/common/" + fileName, PathAttr.LIBRARY).and();
             }
         }
-        for (String node : runner.runtime().nodeNames())
-            if (node.startsWith("dn")) runner.runtime().startNode(node);
     }
 
+
+
+    public void startNodesInOrder() throws RuntimeEngineException {
+        try {
+
+            if (numOfNNs > 1) {
+                // wait for journal nodes to come up
+                Thread.sleep(10000);
+            }
+
+            runner.runtime().startNode("nn1");
+            for (int retry=6; retry>0; retry--) {
+                Thread.sleep(5000);
+                if (isNNUp(1)) break;
+
+                if (retry == 1) {
+                    throw new RuntimeException("NN nn1 is not UP after 30 seconds");
+                }
+            }
+
+            if (numOfNNs > 1) {
+                for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
+                    runner.runtime().startNode("nn" + nnIndex);
+                }
+            }
+
+            for (String node : runner.runtime().nodeNames())
+                if (node.startsWith("dn")) runner.runtime().startNode(node);
+        } catch (InterruptedException e) {
+            logger.warn("startNodesInOrder sleep got interrupted");
+        }
+    }
 
     private String getNNString() {
         StringJoiner stringJoiner = new StringJoiner(",");
@@ -299,7 +289,7 @@ public class ReditHelper {
 
     public void transitionToActive(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to ACTIVE", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToActive --forcemanual nn" + nnNum); //TODO add --forcemanual
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, "bin/hdfs haadmin -transitionToActive nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to ACTIVE.\n" + res.stdErr());
         }
@@ -307,10 +297,9 @@ public class ReditHelper {
 
     public void transitionToStandby(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to STANDBY", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby --forcemanual nn" + nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, "bin/hdfs haadmin -transitionToStandby nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
         }
     }
-
 }

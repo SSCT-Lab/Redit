@@ -1,4 +1,4 @@
-package io.redit.samples.hdfs.lease;
+package io.redit.samples.hdfs.lease.paper.prototype;
 
 import com.google.common.base.Supplier;
 import io.redit.ReditRunner;
@@ -25,10 +25,9 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertFalse;
 
 public class SampleTest {
+    private static final Logger logger = LoggerFactory.getLogger(SampleTest.class);
 
-    protected static final int NUM_OF_NNS = 3;
     protected static final int NUM_OF_DNS = 3;
-    protected static final int NUM_OF_JNS = 3;
 
     private static final int BLOCK_SIZE = 4096;
     private static final int BLOCK_AND_A_HALF = BLOCK_SIZE * 3 / 2;
@@ -36,7 +35,8 @@ public class SampleTest {
     private static final Path TEST_PATH =
             new Path("/test-file");
 
-    protected static final Logger LOG = LoggerFactory.getLogger(SampleTest.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(
+            SampleTest.class);
 
 
     /**
@@ -55,7 +55,7 @@ public class SampleTest {
 
         FSDataOutputStream stm = null;
 
-        ReditHelper reditHelper = new ReditHelper(NUM_OF_NNS, NUM_OF_DNS, NUM_OF_JNS);
+        ReditHelper reditHelper = new ReditHelper(3, NUM_OF_DNS);
         reditHelper.addInstrumentablePath("/share/hadoop/hdfs/hadoop-hdfs-3.1.2.jar");
         reditHelper.getDeploymentBuiler().node("nn1")
                 .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")

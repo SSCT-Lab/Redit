@@ -51,7 +51,7 @@ public class ReditHelper {
         return Deployment.builder("example-hdfs")
                 .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
                 .withService("hadoop-base")
-                .applicationPath("../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
+                .applicationPath("../../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop", PathAttr.COMPRESSED)
                 .applicationPath("etc", "/hadoop/" + dir + "/etc").workDir("/hadoop/" + dir)
                 .environmentVariable("HADOOP_HOME", "/hadoop/" + dir).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
