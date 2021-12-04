@@ -2,7 +2,7 @@ package io.redit;
 
 import java.util.Map;
 
-public class AspectjHomeTest {
+public class AspectJHomeTest {
     public static void main(String[] args) {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet()) {
