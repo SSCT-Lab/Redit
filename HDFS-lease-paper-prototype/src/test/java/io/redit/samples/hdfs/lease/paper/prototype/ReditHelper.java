@@ -84,21 +84,21 @@ public class ReditHelper {
         addRuntimeLibsToDeployment(builder, getHadoopHomeDir());
 
         builder.withService("nn", "hadoop-base").tcpPort(NN_HTTP_PORT, NN_RPC_PORT)
-                .initCommand("bin/hdfs namenode -bootstrapStandby")
-                .startCommand("bin/hdfs --daemon start namenode")
-                .stopCommand("bin/hdfs --daemon stop namenode").and()
+                .initCommand(getHadoopHomeDir()+"bin/hdfs namenode -bootstrapStandby")
+                .startCommand(getHadoopHomeDir()+"bin/hdfs --daemon start namenode")
+                .stopCommand(getHadoopHomeDir()+"bin/hdfs --daemon stop namenode").and()
                 .nodeInstances(numOfNNs, "nn", "nn", true)
                 .withService("dn", "hadoop-base")
-                .startCommand("bin/hdfs --daemon start datanode").stopCommand("bin/hdfs --daemon stop datanode")
+                .startCommand(getHadoopHomeDir()+"bin/hdfs --daemon start datanode").stopCommand(getHadoopHomeDir()+"bin/hdfs --daemon stop datanode")
                 .and().nodeInstances(numOfDNs, "dn", "dn", true)
                 .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1");
 
         if (numOfNNs > 1) {
-            builder.withService("jn", "hadoop-base").startCommand("bin/hdfs --daemon start journalnode")
-                    .stopCommand("bin/hdfs --daemon stop journalnode").and().nodeInstances(3, "jn", "jn", false);
+            builder.withService("jn", "hadoop-base").startCommand(getHadoopHomeDir()+"bin/hdfs --daemon start journalnode")
+                    .stopCommand(getHadoopHomeDir()+"bin/hdfs --daemon stop journalnode").and().nodeInstances(3, "jn", "jn", false);
         }
 
-        builder.node("nn1").initCommand("bin/hdfs namenode -format").and();
+        builder.node("nn1").initCommand(getHadoopHomeDir()+"bin/hdfs namenode -format").and();
 
         deploymentBuiler = builder;
     }

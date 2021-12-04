@@ -13,7 +13,7 @@
     <groupId>io.redit.samples</groupId>
     <artifactId>HDFS-lease-paper-prototype</artifactId>
     <name>Redit Sample - HDFS-lease-paper-prototype</name>
-    <description>Example Redit test cases for HDFS-lease in paper</description>
+    <description>Example Redit test cases for HDFS test</description>
     <url>https://github.com/SATE-Lab/Redit</url>
 
     <properties>
@@ -57,27 +57,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.9.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.0.4</version>
-        </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -140,6 +125,12 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-io</artifactId>
             <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.6</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

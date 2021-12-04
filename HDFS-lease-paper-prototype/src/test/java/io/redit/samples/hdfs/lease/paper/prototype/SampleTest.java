@@ -3,6 +3,7 @@ package io.redit.samples.hdfs.lease.paper.prototype;
 import com.google.common.base.Supplier;
 import io.redit.ReditRunner;
 import io.redit.exceptions.RuntimeEngineException;
+import io.redit.samples.hdfs.lease.paper.prototype.ReditHelper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;

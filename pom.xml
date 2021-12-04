@@ -35,7 +35,7 @@
         <module>sample/sample-HDFS</module>
         <module>sample/sample-HDFS-lease</module>
         <module>sample/sample-HDFS-test</module>
-        <module>sample/HDFS-lease-paper-prototype</module>
+        <module>HDFS-lease-paper-prototype</module>
     </modules>
 
 </project>
