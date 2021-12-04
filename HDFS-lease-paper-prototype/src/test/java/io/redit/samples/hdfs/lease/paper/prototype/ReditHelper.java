@@ -50,7 +50,7 @@ public class ReditHelper {
     private String getHadoopHomeDir() {
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
         String dir = "hadoop-" + version;
-        return "/hadoop/" + dir;
+        return "/hadoop/" + dir + "/";
     }
 
     public void addInstrumentablePath(String path) {
