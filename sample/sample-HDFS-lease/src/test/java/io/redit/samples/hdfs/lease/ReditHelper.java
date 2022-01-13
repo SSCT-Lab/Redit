@@ -5,13 +5,10 @@ import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
 import io.redit.dsl.entities.ServiceType;
 import io.redit.dsl.entities.PortType;
-import io.redit.exceptions.PathNotFoundException;
 import io.redit.exceptions.RuntimeEngineException;
 import io.redit.execution.CommandResults;
-import io.redit.util.FileUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -106,15 +103,8 @@ public class ReditHelper {
                 .startCommand(getHadoopHomeDir() + "/bin/hdfs --daemon start datanode")
                 .stopCommand(getHadoopHomeDir() + "/bin/hdfs --daemon stop datanode").and()
                 .nodeInstances(numOfDNs, "dn", "dn", true)
-                .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1")
-                .node("nn1")
-                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
-                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
-                .stackTrace("e3",
-                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
-                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
-                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
-                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");;
+                .node("nn1").stackTrace("e1", "test.armin.balalaie.io.facebook").and().runSequence("e1");
+
 
         if (numOfNNs > 1) {
             builder.withService("jn", "hadoop-base")
@@ -309,7 +299,7 @@ public class ReditHelper {
 
     public void transitionToActive(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to ACTIVE", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToActive nn" + nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToActive --forcemanual nn" + nnNum); //TODO add --forcemanual
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to ACTIVE.\n" + res.stdErr());
         }
@@ -317,7 +307,7 @@ public class ReditHelper {
 
     public void transitionToStandby(int nnNum) throws RuntimeEngineException {
         logger.info("Transitioning nn{} to STANDBY", nnNum);
-        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby nn" + nnNum);
+        CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby --forcemanual nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
         }
