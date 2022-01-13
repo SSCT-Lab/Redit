@@ -31,11 +31,11 @@
         <module>reditrt</module>
         <module>redit</module>
         <module>sample/sample-multithread</module>
+        <module>sample-multithreadRandom</module>
         <module>sample/sample-scala</module>
         <module>sample/sample-HDFS</module>
         <module>sample/sample-HDFS-lease</module>
         <module>sample/sample-HDFS-test</module>
         <module>HDFS-lease-paper-prototype</module>
     </modules>
-
 </project>
