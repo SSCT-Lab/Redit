@@ -83,21 +83,20 @@ public class ReditHelper {
                     .nodeInstances(numOfJNs, "jn", "jn", false);
         }
 
-//        builder.withNode("zk1", "zk").and();
-//        builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs zkfc -formatZK && " + getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
         builder.node("nn1").initCommand(getHadoopHomeDir() + "/bin/hdfs namenode -format").and();
 
         addInstrumentablePath(builder, "/share/hadoop/hdfs/hadoop-hdfs-3.1.2.jar");
 
-        //TODO if add this , nn2 can not up. if not add, Event t1 is not a defined test case event and cannot be enforced using this method!
-//        builder.node("nn1")
-//                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
-//                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
-//                .stackTrace("e3",
-//                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
-//                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
-//                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
-//                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");
+        //todo stacktrace will down the nn2, with NoClassDefFoundErr
+        builder.node("nn1")
+//                .and().testCaseEvents("t1").runSequence("t1");
+                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
+                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
+                .stackTrace("e3",
+                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
+                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
+                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
+                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");
 
         return builder.build();
     }
@@ -121,19 +120,28 @@ public class ReditHelper {
     }
 
     public static void startNodesInOrder(ReditRunner runner) throws InterruptedException, RuntimeEngineException {
-        if (numOfNNs > 1) {
-            // wait for journal nodes to come up
-            Thread.sleep(10000);
-        }
-        runner.runtime().startNode("nn1");
-        Thread.sleep(10000);
-        if (numOfNNs > 1) {
-            for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
-                runner.runtime().startNode("nn" + nnIndex);
+        try {
+
+            if (numOfNNs > 1) {
+                // wait for journal nodes to come up
+                Thread.sleep(10000);
             }
+
+            runner.runtime().startNode("nn1");
+            Thread.sleep(10000);
+
+            if (numOfNNs > 1) {
+                for (int nnIndex=2; nnIndex<=numOfNNs; nnIndex++) {
+                    runner.runtime().startNode("nn" + nnIndex);
+                }
+            }
+
+            for (String node : runner.runtime().nodeNames())
+                if (node.startsWith("dn")) runner.runtime().startNode(node);
+        } catch (InterruptedException e) {
+            logger.warn("startNodesInOrder sleep got interrupted");
         }
-        for (String node: runner.runtime().nodeNames()) if (node.startsWith("dn")) runner.runtime().startNode(node);
-        Thread.sleep(10000);
+
     }
 
     private static String getNNString() {
@@ -263,5 +271,4 @@ public class ReditHelper {
     }
 
 }
-
 

@@ -1,6 +1,5 @@
 package io.redit.samples.hdfs.test;
 
-import com.google.common.base.Supplier;
 import io.redit.ReditRunner;
 import io.redit.exceptions.RuntimeEngineException;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +23,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
@@ -40,11 +38,15 @@ public class SampleTest {
     @BeforeClass
     public static void before() throws RuntimeEngineException, InterruptedException, ParserConfigurationException, IOException, SAXException, TransformerException, TimeoutException {
 
+        final Configuration conf = new Configuration();
+        // Disable permissions so that another user can recover the lease.
+        conf.setBoolean(DFSConfigKeys.DFS_PERMISSIONS_ENABLED_KEY, false);
+        conf.setInt(DFSConfigKeys.DFS_BLOCK_SIZE_KEY, BLOCK_SIZE);
+
         runner = ReditRunner.run(ReditHelper.getDeployment());
         ReditHelper.startNodesInOrder(runner);
         ReditHelper.waitActive();
         logger.info("The cluster is UP!");
-
 
         ReditHelper.transitionToActive(1, runner);
 
@@ -55,11 +57,8 @@ public class SampleTest {
         AppendTestUtil.write(stm, 0, BLOCK_SIZE / 2);
         stm.hflush();
 
-        final Configuration conf = new Configuration();
-        // Disable permissions so that another user can recover the lease.
-        conf.setBoolean(DFSConfigKeys.DFS_PERMISSIONS_ENABLED_KEY, false);
-        conf.setInt(DFSConfigKeys.DFS_BLOCK_SIZE_KEY, BLOCK_SIZE);
-        DistributedFileSystem fsOtherUser = createFsAsOtherUser(conf);
+
+        DistributedFileSystem fsOtherUser = createFsAsOtherUser();
         assertFalse(fsOtherUser.recoverLease(TEST_PATH));
 
         runner.runtime().enforceOrder("t1", () -> {
@@ -75,6 +74,9 @@ public class SampleTest {
 
         AppendTestUtil.check(fs, TEST_PATH, BLOCK_SIZE/2);
 
+
+
+
     }
 
     @AfterClass
@@ -87,20 +89,15 @@ public class SampleTest {
 
 
     @Test
-    public void sampleTest() throws RuntimeEngineException, SQLException, ClassNotFoundException, TimeoutException {
+    public void sampleTest() {
 
     }
 
-    private static DistributedFileSystem createFsAsOtherUser(final Configuration conf)
+    private static DistributedFileSystem createFsAsOtherUser()
             throws IOException, InterruptedException {
         return (DistributedFileSystem) UserGroupInformation.createUserForTesting(
                 "otheruser", new String[] { "othergroup"})
-                .doAs(new PrivilegedExceptionAction<FileSystem>() {
-                    @Override
-                    public FileSystem run() throws Exception {
-                        return ReditHelper.getFileSystem(runner);
-                    }
-                });
+                .doAs((PrivilegedExceptionAction<FileSystem>) () -> ReditHelper.getFileSystem(runner));
     }
 
     /**
@@ -113,22 +110,20 @@ public class SampleTest {
      */
     private static void loopRecoverLease(final FileSystem fsOtherUser, final Path testPath) throws TimeoutException, InterruptedException {
         try {
-            GenericTestUtils.waitFor(new Supplier<Boolean>() {
-                @Override
-                public Boolean get() {
-                    boolean success;
-                    try {
-                        success = ((DistributedFileSystem)fsOtherUser)
-                                .recoverLease(testPath);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    if (!success) {
-                        logger.info("Waiting to recover lease successfully");
-                    }
-                    return success;
+            GenericTestUtils.waitFor(() -> {
+                boolean success;
+                try {
+                    success = ((DistributedFileSystem)fsOtherUser)
+                            .recoverLease(testPath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
+                if (!success) {
+                    logger.info("Waiting to recover lease successfully");
+                }
+                return success;
             }, 1000, 60000);
+            logger.info("Recover lease successfully !!!");
         } catch (TimeoutException e) {
             throw new TimeoutException("Timed out recovering lease for " + testPath);
         }
