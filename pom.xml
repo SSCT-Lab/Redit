@@ -33,6 +33,7 @@
         <module>sample/sample-multithread</module>
         <module>sample-multithreadRandom</module>
         <module>sample/sample-scala</module>
+        <module>sample/sample-zookeeper</module>
         <module>sample/sample-HDFS</module>
         <module>sample/sample-HDFS-lease</module>
         <module>sample/sample-HDFS-test</module>
