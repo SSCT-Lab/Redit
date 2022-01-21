@@ -60,6 +60,7 @@ public class ReditHelper {
                 .environmentVariable("HADOOP_HOME", getHadoopHomeDir()).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .libraryPath(getHadoopHomeDir() + "/share/hadoop/**/*.jar")
+                .libraryPath(getHadoopHomeDir() + "/share/hadoop/**/*.java")
                 .logDirectory(getHadoopHomeDir() + "/logs").serviceType(ServiceType.JAVA).and();
 
         addRuntimeLibsToDeployment(builder, getHadoopHomeDir());
@@ -87,16 +88,16 @@ public class ReditHelper {
 
         addInstrumentablePath(builder, "/share/hadoop/hdfs/hadoop-hdfs-3.1.2.jar");
 
-        //todo stacktrace will down the nn2, with NoClassDefFoundErr
+        //TODO if add stackTrace , nn2 can not up. if not add, can pass!
         builder.node("nn1")
-//                .and().testCaseEvents("t1").runSequence("t1");
-                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
-                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
-                .stackTrace("e3",
-                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
-                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
-                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
-                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");
+//                .stackTrace("e1", "org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.commitBlockSynchronization")
+//                .stackTrace("e2", "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization")
+//                .stackTrace("e3",
+//                        "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.commitBlockSynchronization,"
+//                                + "org.apache.hadoop.hdfs.server.namenode.FSNamesystem.checkOperation,"
+//                                + "org.apache.hadoop.hdfs.server.namenode.ha.StandbyState.checkOperation")
+//                .and().testCaseEvents("t1").runSequence("e1 * t1 * e2 * e3");
+                .and().testCaseEvents("t1").runSequence("t1");
 
         return builder.build();
     }
@@ -106,6 +107,7 @@ public class ReditHelper {
         for (String cpItem: System.getProperty("java.class.path").split(":")) {
             if (cpItem.contains("aspectjrt") || cpItem.contains("reditrt")) {
                 String fileName = new File(cpItem).getName();
+                logger.info("addRuntimeLibsToDeployment: " + hadoopHome + "/share/hadoop/common/" + fileName);
                 builder.service("hadoop-base")
                         .applicationPath(cpItem, hadoopHome + "/share/hadoop/common/" + fileName, PathAttr.LIBRARY).and();
             }
@@ -267,6 +269,14 @@ public class ReditHelper {
         CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -transitionToStandby nn" + nnNum);
         if (res.exitCode() != 0) {
             throw new RuntimeException("Error while transitioning nn" + nnNum + " to STANDBY.\n" + res.stdErr());
+        }
+    }
+
+    public static void checkNNs(ReditRunner runner) throws RuntimeEngineException {
+        logger.info("start check NNs !!!");
+        for(int nnNum = 1; nnNum <= numOfNNs; nnNum++){
+            CommandResults res = runner.runtime().runCommandInNode("nn" + nnNum, getHadoopHomeDir() + "/bin/hdfs haadmin -getServiceState nn" + nnNum);
+            logger.info("nn" + nnNum + " status: " + res.stdOut());
         }
     }
 

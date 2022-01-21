@@ -2,6 +2,7 @@ package io.redit.samples.hdfs.test;
 
 import io.redit.ReditRunner;
 import io.redit.exceptions.RuntimeEngineException;
+import io.redit.execution.CommandResults;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.TimeoutException;
 
+import static io.redit.samples.hdfs.test.ReditHelper.checkNNs;
 import static org.junit.Assert.assertFalse;
 
 public class SampleTest {
@@ -46,9 +48,11 @@ public class SampleTest {
         runner = ReditRunner.run(ReditHelper.getDeployment());
         ReditHelper.startNodesInOrder(runner);
         ReditHelper.waitActive();
+        checkNNs(runner);
         logger.info("The cluster is UP!");
 
         ReditHelper.transitionToActive(1, runner);
+        checkNNs(runner);
 
         FileSystem fs = ReditHelper.getFileSystem(runner);
         stm = fs.create(TEST_PATH);
@@ -69,12 +73,11 @@ public class SampleTest {
         });
 
         runner.runtime().waitForRunSequenceCompletion(30);
+        checkNNs(runner);
 
         loopRecoverLease(fsOtherUser, TEST_PATH);
 
         AppendTestUtil.check(fs, TEST_PATH, BLOCK_SIZE/2);
-
-
 
 
     }
@@ -89,7 +92,7 @@ public class SampleTest {
 
 
     @Test
-    public void sampleTest() {
+    public void sampleTest(){
 
     }
 
