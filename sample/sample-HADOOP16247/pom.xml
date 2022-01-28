@@ -12,8 +12,8 @@
 
     <groupId>io.redit.samples</groupId>
     <artifactId>sample-HADOOP16247</artifactId>
-    <name>Redit Sample - HDFS</name>
-    <description>Example Redit test cases for HDFS</description>
+    <name>Redit Sample - HADOOP16247</name>
+    <description>Example Redit test cases for HADOOP16247</description>
     <url>https://github.com/SATE-Lab/Redit</url>
 
     <properties>
@@ -21,6 +21,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <hdfs.version>3.1.2</hdfs.version>
+        <jetty.version>9.4.12.v20180830</jetty.version>
     </properties>
 
     <repositories>
@@ -107,7 +108,23 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>3.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-io</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
