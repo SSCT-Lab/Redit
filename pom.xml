@@ -36,9 +36,10 @@
         <module>sample/sample-zookeeper</module>
         <module>sample/sample-HDFS</module>
         <module>sample/sample-Spark</module>
-        <module>sample/sample-HADOOP16247</module>
+        <module>sample/sample-HADOOP-16247</module>
         <module>sample/sample-HDFS-lease</module>
         <module>sample/sample-HDFS-test</module>
         <module>HDFS-lease-paper-prototype</module>
+        <module>sample/sample-HDFS-14679</module>
     </modules>
 </project>

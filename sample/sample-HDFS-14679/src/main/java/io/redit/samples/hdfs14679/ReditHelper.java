@@ -1,17 +1,13 @@
-package io.redit.samples.hadoop16247;
-
+package io.redit.samples.hdfs14679;
 
 import io.redit.ReditRunner;
 import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
-import io.redit.dsl.entities.PortType;
 import io.redit.dsl.entities.ServiceType;
 import io.redit.exceptions.RuntimeEngineException;
 import io.redit.execution.CommandResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -27,9 +23,9 @@ public class ReditHelper {
     public static final Logger logger = LoggerFactory.getLogger(ReditHelper.class);
     private static final int NN_HTTP_PORT = 50070;
     private static final int NN_RPC_PORT = 8020;
-    private static int numOfNNs = 3;
-    private static int numOfDNs = 3;
-    private static int numOfJNs = 3;
+    private static final int numOfNNs = 3;
+    private static final int numOfDNs = 3;
+    private static final int numOfJNs = 3;
 
     public static String getHadoopHomeDir() {
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
@@ -43,7 +39,7 @@ public class ReditHelper {
         String dir = "hadoop-" + version;
         String fsAddress = "mycluster";
         String hdfsSiteFileName = "hdfs-site-ha.xml";
-        Deployment.Builder builder = Deployment.builder("example-hdfs-lease")
+        Deployment.Builder builder = Deployment.builder("example-hdfs-hadoop-14679")
                 .withService("hadoop-base")
                 .applicationPath("../../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())

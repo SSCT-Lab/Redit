@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>io.redit.samples</groupId>
-    <artifactId>sample-HADOOP16247</artifactId>
+    <artifactId>sample-HADOOP-16247</artifactId>
     <name>Redit Sample - HADOOP16247</name>
     <description>Example Redit test cases for HADOOP16247</description>
     <url>https://github.com/SATE-Lab/Redit</url>
