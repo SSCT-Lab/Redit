@@ -20,6 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM zookeeper:3.4.14
+FROM openjdk:8-stretch
 
-RUN apt update && apt install -y iptables iproute2
+RUN apt update && apt install -y iptables iproute2 python libjemalloc1

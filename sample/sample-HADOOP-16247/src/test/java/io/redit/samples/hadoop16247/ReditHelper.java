@@ -40,7 +40,7 @@ public class ReditHelper {
         String dir = "hadoop-" + version;
         String fsAddress = "mycluster";
         String hdfsSiteFileName = "hdfs-site-ha.xml";
-        Deployment.Builder builder = Deployment.builder("example-hdfs-hadoop-16247")
+        Deployment.Builder builder = Deployment.builder("sample-hadoop-16247")
                 .withService("hadoop-base")
                 .applicationPath("../../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())

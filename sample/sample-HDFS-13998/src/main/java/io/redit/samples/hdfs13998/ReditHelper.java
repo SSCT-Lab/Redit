@@ -1,13 +1,18 @@
-package io.redit.samples.hdfs14679;
+package io.redit.samples.hdfs13998;
 
 import io.redit.ReditRunner;
 import io.redit.dsl.entities.Deployment;
 import io.redit.dsl.entities.PathAttr;
+import io.redit.dsl.entities.PortType;
 import io.redit.dsl.entities.ServiceType;
 import io.redit.exceptions.RuntimeEngineException;
 import io.redit.execution.CommandResults;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -16,16 +21,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.StringJoiner;
 
 public class ReditHelper {
     public static final Logger logger = LoggerFactory.getLogger(ReditHelper.class);
+    private static final String CLUSTER_NAME = "mycluster";
     private static final int NN_HTTP_PORT = 50070;
     private static final int NN_RPC_PORT = 8020;
-    private static final int numOfNNs = 3;
-    private static final int numOfDNs = 3;
-    private static final int numOfJNs = 3;
+    private static int numOfNNs = 3;
+    private static int numOfDNs = 3;
+    private static int numOfJNs = 3;
 
     public static String getHadoopHomeDir() {
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
@@ -37,9 +44,8 @@ public class ReditHelper {
 
         String version = "3.1.2"; // this can be dynamically generated from maven metadata
         String dir = "hadoop-" + version;
-        String fsAddress = "mycluster";
         String hdfsSiteFileName = "hdfs-site-ha.xml";
-        Deployment.Builder builder = Deployment.builder("sample-hdfs-14679")
+        Deployment.Builder builder = Deployment.builder("sample-hdfs-13998")
                 .withService("hadoop-base")
                 .applicationPath("../../hadoop-3.1.2-build/hadoop-dist/target/" + dir + ".tar.gz", "/hadoop",  PathAttr.COMPRESSED)
                 .applicationPath("etc", getHadoopHomeDir() + "/etc").workDir(getHadoopHomeDir())
@@ -49,7 +55,7 @@ public class ReditHelper {
                             put("NN_ADDRESSES", getNNAddresses());
                         }})
                 .addSettingsToXml("etc/hadoop/core-site.xml", getHadoopHomeDir() + "/etc/hadoop/core-site.xml",
-                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", fsAddress); }})
+                        new HashMap<String, String>() {{ put("CLUSTER_ADDRESS", CLUSTER_NAME); }})
                 .environmentVariable("HADOOP_HOME", getHadoopHomeDir()).environmentVariable("HADOOP_HEAPSIZE_MAX", "1g")
                 .dockerImageName("redit/hadoop:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .libraryPath(getHadoopHomeDir() + "/share/hadoop/**/*.jar")
@@ -206,6 +212,34 @@ public class ReditHelper {
             logger.warn("Error while trying to get the status of name node");
             return null;
         }
+    }
+
+    public static DistributedFileSystem getDFS(ReditRunner runner) throws IOException {
+        FileSystem fs = FileSystem.get(getConfiguration(runner));
+        if (!(fs instanceof DistributedFileSystem)) {
+            throw new IllegalArgumentException("FileSystem " + fs.getUri() + " is not an HDFS file system");
+        } else {
+            return (DistributedFileSystem)fs;
+        }
+    }
+
+    public static Configuration getConfiguration(ReditRunner runner) {
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://" + CLUSTER_NAME);
+        conf.set("dfs.client.failover.proxy.provider."+ CLUSTER_NAME,
+                "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
+        conf.set("dfs.nameservices", CLUSTER_NAME);
+        conf.set("dfs.ha.namenodes."+ CLUSTER_NAME, getNNString());
+
+        for (int i=1; i<=numOfNNs; i++) {
+            String nnIp = runner.runtime().ip("nn" + i);
+            conf.set("dfs.namenode.rpc-address."+ CLUSTER_NAME +".nn" + i, nnIp + ":" +
+                    runner.runtime().portMapping("nn" + i, NN_RPC_PORT, PortType.TCP));
+            conf.set("dfs.namenode.http-address."+ CLUSTER_NAME +".nn" + i, nnIp + ":" +
+                    runner.runtime().portMapping("nn" + i, NN_HTTP_PORT, PortType.TCP));
+        }
+
+        return conf;
     }
 
     public static void transitionToActive(int nnNum, ReditRunner runner) throws RuntimeEngineException {
