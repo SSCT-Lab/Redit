@@ -41,5 +41,6 @@
         <module>sample/sample-HDFS-test</module>
         <module>HDFS-lease-paper-prototype</module>
         <module>sample/sample-HDFS-14679</module>
+        <module>sample/sample-HDFS-14423</module>
     </modules>
 </project>
