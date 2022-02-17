@@ -17,7 +17,6 @@ import java.io.IOException;
 public class SampleTest {
     private static final Logger logger = LoggerFactory.getLogger(SampleTest.class);
     protected static ReditRunner runner;
-    private static final String xmlPath = ReditHelper.getHadoopHomeDir() + "/etc/hadoop/user_ec_policies.xml.template";
 
     @BeforeClass
     public static void before() throws RuntimeEngineException, ParserConfigurationException, IOException, SAXException, TransformerException, InterruptedException {
