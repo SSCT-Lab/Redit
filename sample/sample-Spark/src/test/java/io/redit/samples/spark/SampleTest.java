@@ -46,10 +46,7 @@ public class SampleTest {
         conf.setMaster(ReditHelper.getClientMasterString(runner, NUM_OF_MASTERS));
         SparkSession spark = SparkSession.builder().config(conf).appName("test").getOrCreate();
 
-
         Dataset<String> logData = spark.read().textFile(logFile).cache();
-
-
 
         long numAs = logData.filter((FilterFunction<String>) s -> s.contains("a")).count();
         long numBs = logData.filter((FilterFunction<String>) s -> s.contains("b")).count();

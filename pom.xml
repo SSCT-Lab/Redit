@@ -44,5 +44,6 @@
         <module>sample/sample-HDFS-14423</module>
         <module>sample/sample-HDFS-13998</module>
         <module>sample/sample-HDFS-14987</module>
+        <module>sample/sample-HDFS-14852</module>
     </modules>
 </project>
