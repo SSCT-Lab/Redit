@@ -19,18 +19,21 @@ public class ReditHelper {
 
         String version = "2.4.3"; // this can be dynamically generated from maven metadata
         String dir = "spark-" + version + "-bin-custom-spark";
+        String tmpdir="/spark/spark-2.4.3-bin-custom-spark/";
         return Deployment.builder("example-spark")
                 .withService("zk").dockerImageName("redit/zk:3.4.14").dockerFileAddress("docker/zk", true).disableClockDrift().and()
                 .withService("spark-base")
                 .applicationPath("../../spark-2.4.3-build/" + dir + ".tar.gz", "/spark", PathAttr.COMPRESSED)
                 .dockerImageName("redit/spark:1.0").dockerFileAddress("docker/Dockerfile", true)
                 .workDir("/spark/" + dir).logDirectory("/spark/" + dir + "/logs").serviceType(ServiceType.SCALA).and()
+
                 .withService("spark-master", "spark-base")
-                .startCommand("sbin/start-master.sh").tcpPort(7077)
+                .startCommand(tmpdir+"sbin/start-master.sh").tcpPort(7077)
                 .environmentVariable("SPARK_DAEMON_JAVA_OPTS", "-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=zk1:2181 "
                         + "-Dzookeeper.sasl.client=false").and().nodeInstances(numOfMasters, "master", "spark-master", true)
+
                 .withService("spark-slave", "spark-base")
-                .startCommand("sbin/start-slave.sh -c 1 -m 1G " + getMasterString(numOfMasters)).and()
+                .startCommand(tmpdir+"sbin/start-slave.sh -c 1 -m 1G " + getMasterString(numOfMasters)).and()
                 .nodeInstances(numOfSlaves, "slave", "spark-slave", true).withNode("zk1", "zk").and().build();
     }
 

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.FilterFunction;
@@ -40,6 +41,21 @@ public class SampleTest {
 
     @Test
     public void sampleTest() throws RuntimeEngineException, SQLException, ClassNotFoundException, TimeoutException {
+        String logFile = "pom.xml"; // Should be some file on your system
+        SparkConf conf = new SparkConf();
+        conf.setMaster(ReditHelper.getClientMasterString(runner, NUM_OF_MASTERS));
+        SparkSession spark = SparkSession.builder().config(conf).appName("test").getOrCreate();
 
+
+        Dataset<String> logData = spark.read().textFile(logFile).cache();
+
+
+
+        long numAs = logData.filter((FilterFunction<String>) s -> s.contains("a")).count();
+        long numBs = logData.filter((FilterFunction<String>) s -> s.contains("b")).count();
+
+        System.out.println("Lines with a: " + numAs + ", lines with b: " + numBs);
+
+        spark.stop();
     }
 }
