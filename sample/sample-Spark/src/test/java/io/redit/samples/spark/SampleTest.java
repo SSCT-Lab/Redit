@@ -41,7 +41,7 @@ public class SampleTest {
 
     @Test
     public void sampleTest() throws RuntimeEngineException, SQLException, ClassNotFoundException, TimeoutException {
-        String logFile = "pom.xml"; // Should be some file on your system
+        String logFile = "pom.xml"; // Should be some file in sample-Spark
         SparkConf conf = new SparkConf();
         conf.setMaster(ReditHelper.getClientMasterString(runner, NUM_OF_MASTERS));
         SparkSession spark = SparkSession.builder().config(conf).appName("test").getOrCreate();
