@@ -26,6 +26,13 @@ public class LowRedundancyBlocks implements Iterable<BlockInfo> {
     private final LongAdder highestPriorityLowRedundancyReplicatedBlocks = new LongAdder();
     private final LongAdder highestPriorityLowRedundancyECBlocks = new LongAdder();
 
+    LowRedundancyBlocks() {
+        for(int i = 0; i < 5; ++i) {
+            this.priorityQueues.add(new LightWeightLinkedSet());
+        }
+
+    }
+
     @Override
     public synchronized Iterator<BlockInfo> iterator() {
         final Iterator<LightWeightLinkedSet<BlockInfo>> q = this.priorityQueues.iterator();
@@ -89,6 +96,30 @@ public class LowRedundancyBlocks implements Iterable<BlockInfo> {
             }
 
             return false;
+        }
+    }
+
+    // HDFS-14852.007.patch
+
+    boolean remove2(BlockInfo block, int priLevel) {
+        return this.remove2(block, priLevel, block.getReplication());
+    }
+
+    boolean remove2(BlockInfo block, int priLevel, int oldExpectedReplicas) {
+        if (priLevel >= 0 && priLevel < 5 && ((LightWeightLinkedSet)this.priorityQueues.get(priLevel)).remove(block)) {
+            NameNode.blockStateChangeLog.debug("BLOCK* NameSystem.LowRedundancyBlock.remove: Removing block {} from priority queue {}", block, priLevel);
+            this.decrementBlockStat(block, priLevel, oldExpectedReplicas);
+            return true;
+        } else {
+            boolean found = false;
+            for(int i = 0; i < 5; ++i) {
+                if (i != priLevel && ((LightWeightLinkedSet)this.priorityQueues.get(i)).remove(block)) {
+                    NameNode.blockStateChangeLog.debug("BLOCK* NameSystem.LowRedundancyBlock.remove: Removing block {} from priority queue {}", block, i);
+                    this.decrementBlockStat(block, i, oldExpectedReplicas);
+                    found = true;
+                }
+            }
+            return found;
         }
     }
 

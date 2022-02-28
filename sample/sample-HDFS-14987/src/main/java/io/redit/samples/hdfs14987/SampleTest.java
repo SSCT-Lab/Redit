@@ -2,9 +2,10 @@ package io.redit.samples.hdfs14987;
 
 import io.redit.ReditRunner;
 import io.redit.exceptions.RuntimeEngineException;
-import io.redit.execution.CommandResults;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.hdfs.client.HdfsDataInputStream;
+import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
 public class SampleTest {
     private static final Logger logger = LoggerFactory.getLogger(SampleTest.class);
@@ -59,56 +60,25 @@ public class SampleTest {
         runner.runtime().runCommandInNode("nn1", ReditHelper.getHadoopHomeDir() + "/bin/hdfs dfs -put " + testFile + " " + ecFilePath);
         runner.runtime().runCommandInNode("nn1", ReditHelper.getHadoopHomeDir() + "/bin/hdfs dfs -put " + testFile + " " + replicaFilePath);
 
-        logger.info(String.valueOf(dfs.getFileEncryptionInfo(new Path(ecFilePath + "/" + testFile))));
-        logger.info(Arrays.toString(dfs.getFileBlockLocations(new Path(ecFilePath + "/" + testFile),0 ,8)));
-        testFileBlocks();
-        testListFiles();
+        Path ecFile = new Path(ecFilePath + "/" + testFile);
+        List<LocatedBlock> lbs1 = ((HdfsDataInputStream) dfs.open(ecFile)).getAllBlocks();
+        long ecBlockId = lbs1.get(0).getBlock().getBlockId();
+        logger.info("ecFile blockId:" + ecBlockId);
 
-        String ViewBlocksCommand_ec = ReditHelper.getHadoopHomeDir() + "/bin/hdfs fsck " + ecFilePath + "/" + testFile + " -files -blocks -locations";
+        Path replicaFile = new Path(replicaFilePath + "/" + testFile);
+        List<LocatedBlock> lbs2 = ((HdfsDataInputStream) dfs.open(replicaFile)).getAllBlocks();
+        long replicaBlockId = lbs2.get(0).getBlock().getBlockId();
+        logger.info("replicaFile blockId:" + replicaBlockId);
+
+
+        String ViewBlocksCommand_ec = ReditHelper.getHadoopHomeDir() + "/bin/hdfs fsck " + ecFilePath + "/" + testFile + " -blockId blk_" + ecBlockId;
         logger.info(ViewBlocksCommand_ec);
         logger.info(runner.runtime().runCommandInNode("nn1", ViewBlocksCommand_ec).stdOut());
-        // TODO  If use fsck, blocking on the command ViewBlocksCommand_ec.
 
-        String ViewBlocksCommand_replica = ReditHelper.getHadoopHomeDir() + "/bin/hdfs fsck " + replicaFilePath + "/" + testFile + " -files -blocks -locations";
+        String ViewBlocksCommand_replica = ReditHelper.getHadoopHomeDir() + "/bin/hdfs fsck " + replicaFilePath + "/" + testFile + " -blockId blk_" + replicaBlockId;
         logger.info(ViewBlocksCommand_replica);
         logger.info(runner.runtime().runCommandInNode("nn1", ViewBlocksCommand_replica).stdOut());
 
-    }
-
-    private void testListFiles() throws IllegalArgumentException, IOException {
-
-        RemoteIterator<LocatedFileStatus> listFiles = dfs.listFiles(new Path("/"),true);
-        while(listFiles.hasNext()) {
-            LocatedFileStatus fileStatus = listFiles.next();
-            System.out.println(fileStatus.getPath().getName());
-            System.out.println(fileStatus.getBlockSize());
-            System.out.println(fileStatus.getPermission());
-            System.out.println(fileStatus.getLen());
-            System.out.println(fileStatus.getBlockLocations().toString());
-
-            BlockLocation[] blockLocations = dfs.getFileBlockLocations(new Path("/"),0,8);
-
-            for(BlockLocation bl : blockLocations) {
-                System.out.println("block-length:"+ bl.getLength() + "--" + "block-offset:" +bl.getOffset());
-                String[]hosts = bl.getHosts();
-                for(String host : hosts) {
-                    System.out.println(host);
-                }
-            }
-            System.out.println("-------------------------");
-        }
-
-    }
-
-    private void testFileBlocks() throws IOException {
-
-        RemoteIterator<Path> rs = dfs.listCorruptFileBlocks(new Path(ecFilePath + "/" + testFile));
-        while(rs.hasNext()) {
-            Path path = rs.next();
-            System.out.println(path.getName());
-            System.out.println(path.toUri());
-            System.out.println(path.depth());
-        }
     }
 
 }
