@@ -18,6 +18,7 @@ out/
 log/
 target/
 !/hadoop-3.1.2-build/hadoop-dist/target
+!/hadoop-3.3.1-build/hadoop-dist/target
 
 .Redit*
 .redit*
