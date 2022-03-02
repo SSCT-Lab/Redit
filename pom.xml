@@ -47,5 +47,7 @@
         <module>sample/sample-HDFS-14852</module>
         <module>sample/sample-HDFS-14847</module>
         <module>sample-hadoop-3.3.1/sample-HADOOP-template</module>
+        <module>sample-hadoop-3.3.1/sample-HDFS-16381</module>
+        <module>sample-hadoop-3.3.1/sample-HDFS-16325</module>
     </modules>
 </project>
