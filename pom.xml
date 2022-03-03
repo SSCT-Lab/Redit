@@ -30,22 +30,23 @@
     <modules>
         <module>reditrt</module>
         <module>redit</module>
-        <module>sample/sample-multithread</module>
+        <module>sample-hadoop-3.1.2/sample-multithread</module>
         <module>sample-multithreadRandom</module>
-        <module>sample/sample-scala</module>
-        <module>sample/sample-zookeeper</module>
-        <module>sample/sample-HDFS</module>
-        <module>sample/sample-Spark</module>
-        <module>sample/sample-HADOOP-16247</module>
-        <module>sample/sample-HDFS-lease</module>
-        <module>sample/sample-HDFS-test</module>
-        <module>HDFS-lease-paper-prototype</module>
-        <module>sample/sample-HDFS-14679</module>
-        <module>sample/sample-HDFS-14423</module>
-        <module>sample/sample-HDFS-13998</module>
-        <module>sample/sample-HDFS-14987</module>
-        <module>sample/sample-HDFS-14852</module>
-        <module>sample/sample-HDFS-14847</module>
+        <module>sample-multisystem/sample-scala</module>
+        <module>sample-multisystem/sample-zookeeper</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS</module>
+        <module>sample-multisystem/sample-Spark</module>
+        <module>sample-hadoop-3.1.2/sample-HADOOP-16247</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-lease</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-test</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-14679</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-14423</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-13998</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-14987</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-14852</module>
+        <module>sample-hadoop-3.1.2/sample-HDFS-14847</module>
         <module>sample-hadoop-3.3.1/sample-HADOOP-template</module>
+        <module>sample-hadoop-3.3.1/sample-HDFS-16381</module>
+        <module>sample-hadoop-3.3.1/sample-HDFS-16325</module>
     </modules>
 </project>
