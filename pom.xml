@@ -4,9 +4,107 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.redit</groupId>
+    <groupId>io.github.martylinzy</groupId>
     <artifactId>Redit-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Zheyuan Lin</name>
+            <email>zheyuanlin86@gmail.com</email>
+            <organization>SATE-Lab</organization>
+            <organizationUrl>https://github.com/SATE-Lab/</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/SATE-Lab/Redit.git</connection>
+        <developerConnection>scm:git:ssh://github.com:SATE-Lab/Redit.git</developerConnection>
+        <url>http://github.com/SATE-Lab/Redit</url>
+    </scm>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <!--plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <packaging>pom</packaging>
     <name>Redit parent POM</name>
     <description>Parent POM for Redit testing library</description>
@@ -30,23 +128,6 @@
     <modules>
         <module>reditrt</module>
         <module>redit</module>
-        <module>sample-hadoop-3.1.2/sample-multithread</module>
-        <module>sample-multithreadRandom</module>
-        <module>sample-multisystem/sample-scala</module>
-        <module>sample-multisystem/sample-zookeeper</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS</module>
-        <module>sample-multisystem/sample-Spark</module>
-        <module>sample-hadoop-3.1.2/sample-HADOOP-16247</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-lease</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-test</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-14679</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-14423</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-13998</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-14987</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-14852</module>
-        <module>sample-hadoop-3.1.2/sample-HDFS-14847</module>
-        <module>sample-hadoop-3.3.1/sample-HADOOP-template</module>
-        <module>sample-hadoop-3.3.1/sample-HDFS-16381</module>
-        <module>sample-hadoop-3.3.1/sample-HDFS-16325</module>
+
     </modules>
 </project>

@@ -42,9 +42,9 @@
     </build>
 
     <parent>
-        <groupId>io.redit</groupId>
+        <groupId>io.github.martylinzy</groupId>
         <artifactId>Redit-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>redit</artifactId>
@@ -64,7 +64,7 @@
             <version>1.7.25</version>
         </dependency>
         <dependency>
-            <groupId>io.redit</groupId>
+            <groupId>io.github.martylinzy</groupId>
             <artifactId>reditrt</artifactId>
             <version>${project.version}</version>
         </dependency>
