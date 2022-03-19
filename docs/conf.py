@@ -22,7 +22,7 @@ import os
 # -- Project information -----------------------------------------------------
 
 project = u'Redit'
-copyright = u'2021, SATE-Lab'
+copyright = u'2022, SATE-Lab'
 author = u'SATE-Lab'
 
 tree = ET.parse(os.path.join(os.path.abspath('.'), '../pom.xml'))
