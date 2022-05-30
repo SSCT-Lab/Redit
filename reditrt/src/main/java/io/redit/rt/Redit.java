@@ -36,6 +36,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * This class acts as a client for the event server and contains the necessary methods for run sequence related instrumentation
+ * 该类包含了运行时方法
  */
 public class Redit {
     private static Redit instance;
@@ -48,6 +49,8 @@ public class Redit {
 
     /**
      * This method returns an instance of Redit class initialized with ip and port from the env
+     * 获取Redit带ip和端口的实例，ip和端口有什么用还有待查看
+     *
      */
     public static Redit getInstance() {
         if (instance == null) {
@@ -61,6 +64,8 @@ public class Redit {
 
     /**
      * Private Constructor
+     * update: Private? Public!
+     * 可以通过该方法直接构造一个redit实例，但我们不会这么用
      * @param hostname the hostname or ip address of the event server
      * @param port the port number for the event server
      */
@@ -73,6 +78,7 @@ public class Redit {
 
     /**
      * Sets allow blocking to true and should be called in the beginning of each instrumented method
+     * 设置锁，锁会在事件调度前被执行
      */
     public void allowBlocking() {
         allowBlocking.set(true);
@@ -83,6 +89,8 @@ public class Redit {
      * then, if the stack matches, the current thread is allowed to be blocked and the blocking condition is satisfied,
      * it blocks the thread until the event dependencies are satisfied. Then, it will mark the event as satisfied in the
      * event server and disallows blocking for the current thread
+     * 该方法强制一个内部事件的执行流程，首先检查事件是否满足，如果栈符合我们的要求，且当前线程被阻塞，那么在前置条件被满足前会继续阻塞
+     * 如果满足了条件，那么会给事件服务器发送信号，解除线程的阻塞
      * @param eventName that needs to be enforced
      * @param stack the stack trace to match in order to allow blocking
      */
@@ -95,7 +103,7 @@ public class Redit {
                     // check if blocking condition is satisfied
                     if (isBlockingConditionSatisfied(eventName)) {
                         blockAndPoll(eventName);
-                        sendEvent(eventName);
+                        sendEvent(eventName);//todo check if the sendEvent works well，会不会是因为blockandpoll卡死了循环
                         allowBlocking.set(false);
                     }
                 }
@@ -108,6 +116,7 @@ public class Redit {
      * it will create a thread that checks that event is not sent yet, then, is the blocking condition is satisfied, it
      * will block the created thread until the event dependencies are satisfied. After getting unblocked, it will run the
      * gc and mark the event as satisfied in the event server.
+     * 和上面的方法一样，只是不发送事件，直接调用垃圾回收，但貌似对象并不会被直接回收，所以没有被使用
      * @param eventName that needs to be enforced
      */
     public void garbageCollection(String eventName) {
@@ -131,6 +140,7 @@ public class Redit {
 
     /**
      * Sends a message to event server to check if the event has been marked as satisfied or not.
+     * 通过和事件服务器的连接，判断事件是否被发送成功
      * @param eventName that needs to be checked
      * @return true if the event is marked as satisfied, otherwise false
      */
@@ -156,6 +166,7 @@ public class Redit {
 
     /**
      * Sends a message to event server to check if the blocking condition for the given event is satisfied or not.
+     * 通过和事件服务器的连接，判断阻塞条件是否满足
      * @param eventName that needs to be checked
      * @return true if the blocking condition is marked as satisfied, otherwise false
      */
@@ -182,6 +193,7 @@ public class Redit {
     /**
      * This method, in an infinite loop, sends a message to event server and checks that the dependency of the given event
      * are satisfied. When the dependencies finally get satisfied, the method will return
+     * 循环查看某个事件条件是否被满足
      * @param eventName that needs to be checked
      */
     public void blockAndPoll(String eventName) {
@@ -195,6 +207,7 @@ public class Redit {
     /**
      * This method, in an infinite loop, sends a message to event server and checks that the dependency of the given event
      * (and the event itself if include event flag is true) are satisfied. When the dependencies finally get satisfied, the method will return
+     * 允许提供一个外部的flag作为条件的检查
      * @param eventName that needs to be checked
      * @param includeEvent the flag to check if the event itself is satisfied or not
      */
@@ -209,6 +222,7 @@ public class Redit {
     /**
      * This method, until gets timeout, sends a message to event server and checks that the dependency of the given event
      * are satisfied. When the dependencies finally get satisfied, the method will return
+     * 超时前都会检查是否满足条件
      * @param eventName that needs to be checked
      * @param includeEvent the flag to check if the event itself is satisfied or not
      * @param timeout amount in seconds

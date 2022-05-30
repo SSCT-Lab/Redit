@@ -36,6 +36,7 @@ public class StackMatcher {
 
     /**
      * This method matches the given stack arg against the current stack trace
+     * 该方法判断当前栈是否是给定的栈，适配多线程
      * @param stack the list of methods separated by comma where the last called method comes in the end
      * @return returns true if the given stack matches exactly the current stack, otherwise false
      */
@@ -61,6 +62,7 @@ public class StackMatcher {
 
     /**
      * transforms a stack trace element into full stack trace string in the format of package.class.method
+     *
      * @param element the stack trace element
      * @return an string in the format of package.class.method
      */
