@@ -25,6 +25,9 @@
 
 package io.redit;
 
+/**
+ * 常量类，如果使用常量的函数有问题可以考虑这里面的硬编码是不是有问题
+ */
 public class Constants {
     // DSL
     public static final String JVM_CLASSPATH_ENVVAR_NAME = "REDIT_JVM_CLASSPATH";

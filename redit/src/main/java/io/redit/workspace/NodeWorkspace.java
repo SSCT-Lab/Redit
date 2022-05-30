@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 对象构造类，节点工作空间需要调度路径、库文件路径、工作目录、根目录、日志目录、日志目录映射等
+ */
 public class NodeWorkspace {
 
     public static class PathMappingEntry {
@@ -64,7 +67,18 @@ public class NodeWorkspace {
     private final Map<String, String> sharedDirectoriesMap;
     private final List<PathMappingEntry> pathMappingList;
 
-
+    /**
+     *
+     * @param instrumentablePaths 调度路径
+     * @param libraryPaths 库文件路径
+     * @param workingDirectory 工作目录
+     * @param rootDirectory 根目录
+     * @param logDirectory 日志目录
+     * @param logDirectoriesMap 日志目录映射
+     * @param logFilesMap 日志文件映射
+     * @param sharedDirectoriesMap 共享目录映射
+     * @param pathMappingList 路径映射列表
+     */
     public NodeWorkspace(Set<String> instrumentablePaths, Set<String> libraryPaths, String workingDirectory,
                          String rootDirectory, String logDirectory, Map<String, String> logDirectoriesMap,
                          Map<String, String> logFilesMap, Map<String, String> sharedDirectoriesMap,

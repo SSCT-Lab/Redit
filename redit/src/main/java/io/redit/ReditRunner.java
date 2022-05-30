@@ -49,6 +49,7 @@ import java.util.*;
  * This class is the main point of contact for all the test cases. Given a deployment definition this class deploys the
  * system into the desired runtime engine. Then, it is possible to enforce test case events through this class or manipulate
  * the deployed environment through calling runtime() method and getting access to the runtime engine
+ * 通过构造runner，testcase可以与运行时引擎交互，捕获事件、环境等
  */
 public class ReditRunner {
     private static final Logger logger = LoggerFactory.getLogger(ReditRunner.class);
@@ -89,6 +90,7 @@ public class ReditRunner {
 
     /**
      * Creates a new runner instance and starts the deployment
+     * 构造runner
      * @param deployment the deployment definition object
      * @return the created runner instance
      */
@@ -110,6 +112,13 @@ public class ReditRunner {
         return runtimeEngine;
     }
 
+    /**
+     * 运行runner
+     * 1. 验证部署环境
+     * 2. 设置工作空间
+     * 3. 调度节点的运行
+     * 4. 获取运行时引擎
+     */
     private void start() {
         try {
             // Register the shutdown hook
@@ -165,6 +174,7 @@ public class ReditRunner {
 
     /**
      * Stops the runner by stopping or killing all the deployed nodes
+     * 废弃函数，5s后没有停止运行时引擎
      * @param kill the flag to require killing of the nodes
      */
     public void stop(boolean kill) {
@@ -185,7 +195,9 @@ public class ReditRunner {
     }
 
     /**
+     * 检查运行时引擎是否被暂停
      * @return true is the runner is stopped or not started yet, otherwise false
+     *
      */
     public boolean isStopped() {
         if (runtimeEngine == null) {
@@ -194,6 +206,12 @@ public class ReditRunner {
         return runtimeEngine.isStopped();
     }
 
+    /**
+     * 添加节点，被废弃
+     * @param limitedBuilder
+     * @throws WorkspaceException
+     * @throws RuntimeEngineException
+     */
     public void addNode(Node.LimitedBuilder limitedBuilder) throws WorkspaceException, RuntimeEngineException {
         Node node = limitedBuilder.build();
         NodeWorkspace nodeWorkspace = workspaceManager.createNodeWorkspace(node);
@@ -201,6 +219,9 @@ public class ReditRunner {
     }
 }
 
+/**
+ * 用于平滑推出系统的钩子函数
+ */
 class ReditShutdownHook extends Thread {
     private static Logger logger = LoggerFactory.getLogger(ReditShutdownHook.class);
 

@@ -175,7 +175,7 @@ public class WorkspaceManager {
         return retMap;
     }
 
-    // TODO should this be public?
+    // TODO should this be public? the usage is abandoned,i thought it is feasible
     public NodeWorkspace createNodeWorkspace(Node node)
             throws WorkspaceException {
         logger.info("Creating workspace for node {}", node.getName());
