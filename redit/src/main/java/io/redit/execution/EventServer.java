@@ -33,6 +33,9 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * todo: need more check for effectiveness
+ */
 public class EventServer {
     private final static Logger logger = LoggerFactory.getLogger(EventServer.class);
     private Server jettyServer;

@@ -45,7 +45,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * 核心运行类，整个系统基于re展开，部署、测试、检查都在re内部
- * todo reditRunner为什么没有被使用
+ *
  */
 public abstract class RuntimeEngine implements LimitedRuntimeEngine {
     private final static Logger logger = LoggerFactory.getLogger(RuntimeEngine.class);
@@ -56,7 +56,7 @@ public abstract class RuntimeEngine implements LimitedRuntimeEngine {
     protected boolean stopped;
     protected final NetworkPartitionManager networkPartitionManager;
     protected final NetworkOperationManager networkOperationManager;
-    private ReditRunner reditRunner;
+    private ReditRunner reditRunner; //everywhere using this var will optimize and use outside var
     private EventService eventService;
     private Redit reditClient;
 
@@ -85,6 +85,11 @@ public abstract class RuntimeEngine implements LimitedRuntimeEngine {
         return stopped;
     }
 
+    /**
+     * 核心函数，指导整个运行系统的构造，作为中心点，可用于理解系统
+     * @param reditRunner 外部提供的runner
+     * @throws RuntimeEngineException
+     */
     public void start(ReditRunner reditRunner) throws RuntimeEngineException {
         this.reditRunner = reditRunner;
 
