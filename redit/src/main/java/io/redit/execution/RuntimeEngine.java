@@ -43,6 +43,10 @@ import java.net.NetworkInterface;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * 核心运行类，整个系统基于re展开，部署、测试、检查都在re内部
+ * todo reditRunner为什么没有被使用
+ */
 public abstract class RuntimeEngine implements LimitedRuntimeEngine {
     private final static Logger logger = LoggerFactory.getLogger(RuntimeEngine.class);
     private final EventServer eventServer;
@@ -67,7 +71,7 @@ public abstract class RuntimeEngine implements LimitedRuntimeEngine {
         networkOperationManager = new NetworkOperationManager(this);
     }
 
-    // TODO this method should use an external configuration to detect the proper runtime engine and its corresponding configs
+    // TODO this method should use an external configuration to detect the proper runtime engine and its corresponding config. In fact, it's unnecessary.
     // By default this method returns single node runtime engine
     public static RuntimeEngine getRuntimeEngine(Deployment deployment, Map<String, NodeWorkspace> nodeWorkspaceMap) {
         return new SingleNodeRuntimeEngine(deployment, nodeWorkspaceMap);
