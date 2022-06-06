@@ -27,8 +27,9 @@ package io.redit.dsl.events;
 import io.redit.dsl.ReferableDeploymentEntity;
 
 /**
- * This class represents events than can be enforced from the test case and can be referred to be referred to in the run
+ * This class represents events then can be enforced from the test case and can be referred to in the run
  * sequence.
+ *
  */
 public class TestCaseEvent extends ReferableDeploymentEntity {
     public TestCaseEvent(String name) {
