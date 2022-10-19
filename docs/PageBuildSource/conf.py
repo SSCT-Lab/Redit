@@ -25,7 +25,7 @@ project = u'Redit'
 copyright = u'2022, SATE-Lab'
 author = u'SATE-Lab'
 
-tree = ET.parse(os.path.join(os.path.abspath('.'), '../pom.xml'))
+tree = ET.parse(os.path.join(os.path.abspath('.'), '../../pom.xml'))
 root = tree.getroot()
 for child in root:
     if child.tag.endswith('version'):
