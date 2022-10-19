@@ -83,6 +83,105 @@
 failures during a normal test case execution. Currently, node failure, network partition, network delay, network packet loss, and clock drift is supported. For a few supported languages, it is possible to enforce a specific order between
 nodes in order to reproduce a specific time-sensitive scenario and inject failures before or after a specific method is
 called when a specific stack trace is present.</p>
+</section>
+<section id="bugs-reproduced-by-redit">
+<h2>Bugs Reproduced by Redit<a class="headerlink" href="#bugs-reproduced-by-redit" title="Permalink to this headline"></a></h2>
+<p>We applied Redit to 19 versions of 8 widely-used cloud systems including Cassandra-3.11.6, HDFS-3.3.0, HDFS-3.1.2, ZK-3.7.0,
+and HBASE-2.4.12. The following table shows the bugs reproduced by Redit in these systems.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bug ID</p></th>
+<th class="head"><p>Bug Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HBASE-26114">HBASE-26114</a></p></td>
+<td><p>HMaster cannot start normally</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HBASE-26114">HBASE-23682</a></p></td>
+<td><p>HMaster cannot become active master</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HBASE-21487">HBASE-21487</a></p></td>
+<td><p>Concurrent modify table ops lead to unexpected results</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/CASSANDRA-16836">CASSANDRA-16836</a></p></td>
+<td><p>Materialized views incorrect quoting of UDF</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/CASSANDRA-14365">CASSANDRA-14365</a></p></td>
+<td><p>Commit log replay failure</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/CASSANDRA-13669">CASSANDRA-13669</a></p></td>
+<td><p>Error when starting cassandra</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/KAFKA-13563">KAFKA-13563</a></p></td>
+<td><p>Coordinator never get found</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/KAFKA-12866">KAFKA-12866</a></p></td>
+<td><p>Root access Error</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/KAFKA-7192">KAFKA-7192</a></p></td>
+<td><p>State-store can desynchronise with changelog</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/KAFKA-12702">KAFKA-12702</a></p></td>
+<td><p>NPE caused by host address lost in configure</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HDFS-13998">HDFS-13998</a></p></td>
+<td><p>EC policy get failure</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HDFS-14987">HDFS-14987</a></p></td>
+<td><p>EC policy store state get error</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/HDFS-16381">HDFS-16381</a></p></td>
+<td><p>Lease related errors</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ROCKETMQ-266">ROCKETMQ-266</a></p></td>
+<td><p>Consumer service crash</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ROCKETMQ-257">ROCKETMQ-257</a></p></td>
+<td><p>Producer communication error</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ROCKETMQ-189">ROCKETMQ-189</a></p></td>
+<td><p>Misleading message for timestamp exception</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ZOOKEEPER-4508">ZOOKEEPER-4508</a></p></td>
+<td><p>Client endless loop</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ZOOKEEPER-2355">ZOOKEEPER-2355</a></p></td>
+<td><p>Ephemeral node is never deleted if follower fails</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/ZOOKEEPER-3479">ZOOKEEPER-3479</a></p></td>
+<td><p>Logging false leader election times</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/AMQ-8050">AMQ-8050</a></p></td>
+<td><p>XAException when failing over in a transaction</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/AMQ-7337">AMQ-7337</a></p></td>
+<td><p>Fail to re-establish message pull state</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://issues.apache.org/jira/browse/AMQ-6430">AMQ-6430</a></p></td>
+<td><p>Failure after client reconnection</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/elastic/elasticsearch/pull/8321">Elasticsearch-8321</a></p></td>
+<td><p>Cluster refuse to vote leader</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/elastic/elasticsearch/pull/9051">Elasticsearch-9051</a></p></td>
+<td><p>Cluster refuse to vote leader</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/elastic/elasticsearch/pull/2488">Elasticsearch-2488</a></p></td>
+<td><p>split-brain</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/elastic/elasticsearch/issues/19269">Elasticsearch-19269</a></p></td>
+<td><p>version info conflict due to network partition</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/elastic/elasticsearch/issues/14671">Elasticsearch-14671</a></p></td>
+<td><p>Network partition for stale replicas</p></td>
+</tr>
+</tbody>
+</table>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
 <ul>
