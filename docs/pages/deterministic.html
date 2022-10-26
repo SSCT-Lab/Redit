@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deterministic Failure Injection &mdash; Redit 0.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Deterministic Failure Injection &mdash; Redit 0.1.0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -40,7 +37,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="prereq.html">Prerequisites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
@@ -81,24 +78,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="deterministic-failure-injection">
-<h1>Deterministic Failure Injection<a class="headerlink" href="#deterministic-failure-injection" title="Permalink to this headline"></a></h1>
+  <div class="section" id="deterministic-failure-injection">
+<h1>Deterministic Failure Injection<a class="headerlink" href="#deterministic-failure-injection" title="Permalink to this headline">¶</a></h1>
 <p>Although injecting a failure by calling a method in the middle of a test case is suitable for many of the scenarios, there
 exists scenarios where it is needed to inject failures in a very specific moment. With Redit, for a few supported
 languages, it is possible to inject a failure right before or after a method call where a specific stack trace is present.
 This happens through defining a set of named internal and test case events, ordering those events in a run sequence
 string, and let the Redit’s runtime engine enforce the specified order between the nodes.</p>
-<section id="internal-events">
-<h2>Internal Events<a class="headerlink" href="#internal-events" title="Permalink to this headline"></a></h2>
+<div class="section" id="internal-events">
+<h2>Internal Events<a class="headerlink" href="#internal-events" title="Permalink to this headline">¶</a></h2>
 <p>Internal events are the ones that happen inside a node. Realizing internal events requires binary instrumentation, and as such,
 is only supported for a few programming languages. You can find more information in <a class="reference internal" href="runseq.html"><span class="doc">Run Sequence Instrumentation Engine</span></a> page.
 Available internal events are:</p>
 <ul class="simple">
-<li><p><strong>Scheduling Event</strong>: This event can be of type <em>BLOCKING</em> or <em>UNBLOCKING</em> and can happen before or after a specific
+<li><strong>Scheduling Event</strong>: This event can be of type <em>BLOCKING</em> or <em>UNBLOCKING</em> and can happen before or after a specific
 stack trace. The stack trace should come from a stack trace event definition. When defining this kind of events, the
 definition should be a pair of blocking and unblocking events. Basically, make sure to finally unblock everything that
 has been blocked. This event is useful when it is needed to block all the threads for a specific stack trace, do some
-other stuff or let the other threads make progress, and then, unblock the blocked threads.</p></li>
+other stuff or let the other threads make progress, and then, unblock the blocked threads.</li>
 </ul>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="na">withNode</span><span class="p">(</span><span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;service1&quot;</span><span class="p">)</span>
     <span class="p">.</span><span class="na">withSchedulingEvent</span><span class="p">(</span><span class="s">&quot;bast1&quot;</span><span class="p">)</span>
@@ -116,7 +113,7 @@ other stuff or let the other threads make progress, and then, unblock the blocke
 </pre></div>
 </div>
 <ul>
-<li><p><strong>Stack Trace Event</strong>: This event is kind of like a scheduling event except that nothing happens between blocking and
+<li><p class="first"><strong>Stack Trace Event</strong>: This event is kind of like a scheduling event except that nothing happens between blocking and
 unblocking. All the threads with the defined stack trace will be blocked until the dependencies of the event are
 satisfied (based on the defined run sequence). The blocking can happen before or after a method. This event can act as
 an indicator that the program has reached a specific method with a specific stack trace. To specify the stack traces,
@@ -138,16 +135,16 @@ current stack trace. Only the right order of appearance is sufficient.</p>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><strong>Garbage Collection Event</strong>: This event is for invoking the garbage collector for supported languages e.g. Java.</p></li>
+<li><strong>Garbage Collection Event</strong>: This event is for invoking the garbage collector for supported languages e.g. Java.</li>
 </ul>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">withNode</span><span class="p">(</span><span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;service1&quot;</span><span class="p">).</span>
     <span class="p">.</span><span class="na">withGarbageCollectionEvent</span><span class="p">(</span><span class="s">&quot;gc1&quot;</span><span class="p">).</span><span class="na">and</span><span class="p">()</span>
 <span class="n">and</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
-<section id="test-case-events">
-<h2>Test Case Events<a class="headerlink" href="#test-case-events" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="test-case-events">
+<h2>Test Case Events<a class="headerlink" href="#test-case-events" title="Permalink to this headline">¶</a></h2>
 <p>Test case events are the connection point between the test case and the Redit’s runtime engine. Internal events’
 orders are enforced by the runtime engine, but it is the test case responsibility to enforce the test case events if they
 are included in the run sequence.</p>
@@ -155,9 +152,9 @@ are included in the run sequence.</p>
     <span class="p">.</span><span class="na">testCaseEvents</span><span class="p">(</span><span class="s">&quot;tc1&quot;</span><span class="p">,</span><span class="s">&quot;tc2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="the-run-sequence">
-<h2>The Run Sequence<a class="headerlink" href="#the-run-sequence" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="the-run-sequence">
+<h2>The Run Sequence<a class="headerlink" href="#the-run-sequence" title="Permalink to this headline">¶</a></h2>
 <p>Finally after defining all the necessary events, you should tie them together in the run sequence by using event names
 as the operands, <code class="docutils literal notranslate"><span class="pre">*</span></code> and <code class="docutils literal notranslate"><span class="pre">|</span></code> as operators and parenthesis. <code class="docutils literal notranslate"><span class="pre">*</span></code> and <code class="docutils literal notranslate"><span class="pre">|</span></code> indicate sequential and parallel execution
 respectively.</p>
@@ -182,8 +179,8 @@ dependencies to be satisfied the <code class="docutils literal notranslate"><spa
 </pre></div>
 </div>
 <p>Here again, if the event dependecies are not satisfied in 10 seconds, a <code class="docutils literal notranslate"><span class="pre">TimeoutException</span></code> will be thrown.</p>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
