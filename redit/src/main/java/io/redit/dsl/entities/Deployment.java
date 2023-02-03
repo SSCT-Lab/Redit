@@ -84,7 +84,7 @@ public class Deployment extends DeploymentEntity {
 
     /**
      * @param name the name of the deployment definition
-     * @return givem the deployment definition name, returns a deployment definition builder
+     * @return given the deployment definition name, returns a deployment definition builder
      */
     public static Builder builder(String name) {
         return new Builder(name);

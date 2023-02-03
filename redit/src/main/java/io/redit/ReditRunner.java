@@ -220,7 +220,7 @@ public class ReditRunner {
 }
 
 /**
- * 用于平滑推出系统的钩子函数
+ * 用于平滑退出系统的钩子函数
  */
 class ReditShutdownHook extends Thread {
     private static Logger logger = LoggerFactory.getLogger(ReditShutdownHook.class);
