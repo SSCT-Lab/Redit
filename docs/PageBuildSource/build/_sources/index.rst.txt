@@ -21,7 +21,7 @@ called when a specific stack trace is present. You can find full documentation i
 Bugs Reproduced by Redit
 ====================================
 We applied Redit to 23 versions of 8 widely-used cloud systems including Cassandra-3.11.6, HDFS-3.3.0, HDFS-3.1.2, ZK-3.7.0,
-and HBASE-2.4.12. The following table shows the bugs reproduced by Redit in these systems. 
+and HBASE-2.4.12. The following table shows the bugs reproduced by Redit in these systems.  
 
 ============================================================================== ===================================================================================== =====================================================================================================================================
 Bug ID                                                                         Bug Description                                                                       Redit Code
@@ -46,7 +46,7 @@ Bug ID                                                                         B
 `HDFS-13998 <https://issues.apache.org/jira/browse/HDFS-13998>`_               EC policy get failure                                                                 `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-13998>`_
 `HDFS-14528 <https://issues.apache.org/jira/browse/HDFS-14528>`_               Failover from Active to Standby Failed                                                `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-14528>`_
 `HDFS-14987 <https://issues.apache.org/jira/browse/HDFS-14987>`_               EC policy store state get error                                                       `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-14987>`_
-`HDFS-15398 <https://issues.apache.org/jira/browse/HDFS-15398>`_               EC: hdfs client hangs due to exception during addBlock                                `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-15398>`
+`HDFS-15398 <https://issues.apache.org/jira/browse/HDFS-15398>`_               EC: hdfs client hangs due to exception during addBlock                                `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-15398>`_
 `HDFS-15443 <https://issues.apache.org/jira/browse/HDFS-15443>`_               Set dfs.datanode.max.transfer.threads to a very small value can cause strange failure `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-15443>`_
 `HDFS-16381 <https://issues.apache.org/jira/browse/HDFS-16381>`_               Lease related errors                                                                  `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/HDFS/Redit-HDFS-16381>`_
 `HBASE-23682 <https://issues.apache.org/jira/browse/HBASE-23682>`_             HMaster cannot become active master                                                   `Code <https://github.com/SATE-Lab/Redit_Bugs_Benchmark/tree/master/Bugs/Hbase/Redit-Hbase-23682>`_
